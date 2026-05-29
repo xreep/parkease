@@ -4,11 +4,6 @@ import API from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 
-const DOT_GRID = {
-  backgroundImage: 'radial-gradient(#2563eb15 1px, transparent 1px)',
-  backgroundSize: '20px 20px',
-}
-
 const STATUS = {
   PENDING:   { dot: 'bg-yellow-400', text: 'text-yellow-700', bg: 'bg-yellow-50',  border: 'border-yellow-200', label: 'Pending'   },
   CONFIRMED: { dot: 'bg-green-500',  text: 'text-green-700',  bg: 'bg-green-50',   border: 'border-green-200',  label: 'Confirmed' },
@@ -40,8 +35,8 @@ const TABS = [
   { key: 'block',    label: 'Block Dates' },
 ]
 
-const inp = 'w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white'
-const inpSm = 'border border-gray-300 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1'
+const inp = 'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white input-modern'
+const inpSm = 'border border-gray-200 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex-1'
 
 const TH = ({ children }) => (
   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap" style={{ background: '#f8fafc' }}>{children}</th>
@@ -179,15 +174,26 @@ const OwnerDashboard = () => {
       <Navbar />
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-200" style={DOT_GRID}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Owner Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{user?.name}</p>
+      <div
+        className="border-b border-gray-100"
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+          backgroundImage: 'radial-gradient(#2563eb12 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-7 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(180deg, #2563eb, #0ea5e9)' }}></div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Owner Dashboard</h1>
+              <p className="text-sm text-gray-500 mt-0.5">{user?.name}</p>
+            </div>
           </div>
-          <Link to="/owner/add-parking"
-            className="text-sm text-white px-4 py-2 rounded-lg font-medium shadow-sm"
-            style={{ background: '#2563eb' }}>
+          <Link
+            to="/owner/add-parking"
+            className="btn-primary text-sm text-white px-4 py-2.5 rounded-xl font-medium"
+          >
             Add listing
           </Link>
         </div>
@@ -199,7 +205,7 @@ const OwnerDashboard = () => {
           <div className="flex -mb-px overflow-x-auto">
             {TABS.map(t => (
               <button key={t.key} onClick={() => setActiveTab(t.key)}
-                className="px-5 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+                className="px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap relative"
                 style={{
                   borderBottomColor: activeTab === t.key ? '#2563eb' : 'transparent',
                   color: activeTab === t.key ? '#2563eb' : '#6b7280',
@@ -219,9 +225,9 @@ const OwnerDashboard = () => {
               { label: 'Total earnings', value: earnings ? `Rs. ${earnings.totalEarnings.toFixed(0)}` : 'Rs. 0', sub: 'Completed bookings', color: '#7c3aed' },
               { label: 'This month', value: earnings ? `Rs. ${earnings.thisMonthEarnings.toFixed(0)}` : 'Rs. 0', sub: earnings ? `Today: Rs. ${earnings.todayEarnings.toFixed(0)}` : '', color: '#d97706' },
             ].map(s => (
-              <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+              <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover"
                 style={{ borderTop: `3px solid ${s.color}` }}>
-                <p className="text-2xl font-bold text-gray-900">{s.value}</p>
+                <p className="text-3xl font-bold mb-0.5 stat-number">{s.value}</p>
                 <p className="text-sm font-medium text-gray-600 mt-0.5">{s.label}</p>
                 {s.sub && <p className="text-xs text-gray-400 mt-0.5">{s.sub}</p>}
               </div>
@@ -231,14 +237,14 @@ const OwnerDashboard = () => {
 
         {/* Listings */}
         {activeTab === 'listings' && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">My Listings</h2>
             </div>
             {listings.length === 0 ? (
               <div className="text-center py-14">
                 <p className="text-gray-400 text-sm mb-4">No listings yet.</p>
-                <Link to="/owner/add-parking" className="text-sm text-white px-4 py-2 rounded-lg font-medium shadow-sm" style={{ background: '#2563eb' }}>Add listing</Link>
+                <Link to="/owner/add-parking" className="btn-primary inline-block text-sm text-white px-4 py-2.5 rounded-xl font-medium">Add listing</Link>
               </div>
             ) : (
               <div>
@@ -247,7 +253,7 @@ const OwnerDashboard = () => {
                   const isEditing = editScheduleId === l.id
                   return (
                     <div key={l.id} className="border-b border-gray-100 last:border-b-0">
-                      <div className="flex items-center hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center hover:bg-gray-50/80 transition-colors duration-150">
                         <div className="px-6 py-4 flex-1 min-w-0">
                           <p className="font-medium text-gray-900 truncate">{l.title}</p>
                           <p className="text-xs text-gray-400 mt-0.5 truncate">{l.address}</p>
@@ -264,7 +270,7 @@ const OwnerDashboard = () => {
                         <div className="px-4 py-4 flex items-center gap-3">
                           <button
                             onClick={() => openScheduleEdit(l)}
-                            className="text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-colors whitespace-nowrap"
+                            className="text-xs font-medium px-2.5 py-1.5 rounded-xl border transition-all duration-200 whitespace-nowrap"
                             style={isEditing
                               ? { background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }
                               : { background: '#f8fafc', color: '#6b7280', borderColor: '#e5e7eb' }
@@ -272,19 +278,18 @@ const OwnerDashboard = () => {
                           >
                             {isEditing ? 'Close' : 'Schedule'}
                           </button>
-                          <Link to={`/parking/${l.id}`} className="text-xs hover:underline font-medium" style={{ color: '#2563eb' }}>View</Link>
+                          <Link to={`/parking/${l.id}`} className="text-xs hover:underline font-medium transition-colors" style={{ color: '#2563eb' }}>View</Link>
                         </div>
                       </div>
 
-                      {/* Inline schedule editor */}
                       {isEditing && (
                         <div className="border-t border-blue-100 bg-blue-50/40 px-6 py-5">
                           <p className="text-sm font-semibold text-gray-800 mb-3">Weekly availability schedule</p>
                           {scheduleError && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-xs mb-3">{scheduleError}</div>
+                            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-3 py-2 text-xs mb-3">{scheduleError}</div>
                           )}
                           {scheduleSuccess && (
-                            <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-3 py-2 text-xs mb-3">{scheduleSuccess}</div>
+                            <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-3 py-2 text-xs mb-3">{scheduleSuccess}</div>
                           )}
                           <div className="space-y-2 mb-4">
                             {scheduleForm.map((day) => (
@@ -295,11 +300,11 @@ const OwnerDashboard = () => {
                                 <button
                                   type="button"
                                   onClick={() => updateScheduleDay(day.dayOfWeek, 'isAvailable', !day.isAvailable)}
-                                  className="relative flex-shrink-0 w-9 h-5 rounded-full transition-colors"
+                                  className="relative flex-shrink-0 w-9 h-5 rounded-full transition-colors duration-200"
                                   style={{ background: day.isAvailable ? '#2563eb' : '#d1d5db' }}
                                 >
                                   <span
-                                    className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                                    className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
                                     style={{ transform: day.isAvailable ? 'translateX(18px)' : 'translateX(2px)' }}
                                   />
                                 </button>
@@ -329,14 +334,13 @@ const OwnerDashboard = () => {
                             <button
                               onClick={() => handleScheduleSave(l.id)}
                               disabled={scheduleSaving}
-                              className="text-xs text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-60"
-                              style={{ background: '#2563eb' }}
+                              className="btn-primary text-xs text-white font-medium px-4 py-2 rounded-xl disabled:opacity-60"
                             >
                               {scheduleSaving ? 'Saving...' : 'Save schedule'}
                             </button>
                             <button
                               onClick={() => setEditScheduleId(null)}
-                              className="text-xs text-gray-500 font-medium px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                              className="text-xs text-gray-500 font-medium px-4 py-2 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors"
                             >
                               Cancel
                             </button>
@@ -353,7 +357,7 @@ const OwnerDashboard = () => {
 
         {/* Bookings */}
         {activeTab === 'bookings' && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">Bookings Received</h2>
             </div>
@@ -367,7 +371,7 @@ const OwnerDashboard = () => {
                     {bookings.map(b => {
                       const s = STATUS[b.status] || STATUS.PENDING
                       return (
-                        <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={b.id} className="hover:bg-gray-50/80 transition-colors duration-150">
                           <td className="px-6 py-4 font-medium text-gray-900">{b.parking?.title || '-'}</td>
                           <td className="px-6 py-4 text-gray-600">{b.user?.name || '-'}</td>
                           <td className="px-6 py-4 text-xs text-gray-500 whitespace-nowrap">{fmt(b.startTime)}</td>
@@ -385,12 +389,11 @@ const OwnerDashboard = () => {
                             {b.status === 'PENDING' && (
                               <div className="flex gap-2">
                                 <button onClick={() => handleReject(b.id)} disabled={!!actionLoading}
-                                  className="text-xs text-gray-500 border border-gray-200 px-2.5 py-1 rounded-lg hover:border-red-300 hover:text-red-600 transition-colors disabled:opacity-50">
+                                  className="text-xs text-gray-500 border border-gray-200 px-2.5 py-1.5 rounded-xl hover:border-red-300 hover:text-red-600 transition-all duration-200 disabled:opacity-50">
                                   {actionLoading === `reject-${b.id}` ? '...' : 'Reject'}
                                 </button>
                                 <button onClick={() => handleApprove(b.id)} disabled={!!actionLoading}
-                                  className="text-xs text-white px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
-                                  style={{ background: '#2563eb' }}>
+                                  className="btn-primary text-xs text-white px-2.5 py-1.5 rounded-xl disabled:opacity-50">
                                   {actionLoading === `approve-${b.id}` ? '...' : 'Approve'}
                                 </button>
                               </div>
@@ -416,9 +419,9 @@ const OwnerDashboard = () => {
                 { label: 'Today', value: earnings ? `Rs. ${earnings.todayEarnings.toFixed(0)}` : 'Rs. 0', color: '#d97706' },
                 { label: 'Completed bookings', value: earnings?.bookingCount ?? 0, color: '#16a34a' },
               ].map(s => (
-                <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+                <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover"
                   style={{ borderTop: `3px solid ${s.color}` }}>
-                  <p className="text-2xl font-bold text-gray-900">{s.value}</p>
+                  <p className="text-3xl font-bold mb-0.5 stat-number">{s.value}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
                 </div>
               ))}
@@ -430,11 +433,11 @@ const OwnerDashboard = () => {
         {/* Block Dates */}
         {activeTab === 'block' && (
           <div className="grid lg:grid-cols-2 gap-6">
-            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900 mb-4">Block a time slot</h2>
               <form onSubmit={handleBlockSubmit} className="space-y-3">
-                {blockError && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-xs">{blockError}</div>}
-                {blockSuccess && <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-3 py-2 text-xs">{blockSuccess}</div>}
+                {blockError && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-3 py-2 text-xs">{blockError}</div>}
+                {blockSuccess && <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-3 py-2 text-xs">{blockSuccess}</div>}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Listing</label>
                   <select value={blockForm.parkingListingId} onChange={e => setBlockForm(f => ({ ...f, parkingListingId: e.target.value }))} className={inp} required>
@@ -461,14 +464,13 @@ const OwnerDashboard = () => {
                   <input type="text" placeholder="e.g. Maintenance" value={blockForm.reason} onChange={e => setBlockForm(f => ({ ...f, reason: e.target.value }))} className={inp} />
                 </div>
                 <button type="submit" disabled={blockLoading}
-                  className="w-full text-white text-sm font-medium py-2.5 rounded-lg transition-colors shadow-sm disabled:opacity-60"
-                  style={{ background: '#2563eb' }}>
+                  className="btn-primary w-full text-white text-sm font-medium py-2.5 rounded-xl disabled:opacity-60">
                   {blockLoading ? 'Blocking...' : 'Block slot'}
                 </button>
               </form>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-100">
                 <h2 className="text-sm font-semibold text-gray-900">Blocked slots</h2>
               </div>
@@ -477,14 +479,14 @@ const OwnerDashboard = () => {
               ) : (
                 <div className="divide-y divide-gray-100">
                   {blockedSlots.map(slot => (
-                    <div key={slot.id} className="px-5 py-4 flex items-start justify-between gap-3">
+                    <div key={slot.id} className="px-5 py-4 flex items-start justify-between gap-3 hover:bg-gray-50/80 transition-colors">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{slot.parking?.title}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{fmtDate(slot.blockedDate)} &bull; {fmtTime(slot.startTime)} &ndash; {fmtTime(slot.endTime)}</p>
                         {slot.reason && <p className="text-xs text-gray-400">{slot.reason}</p>}
                       </div>
                       <button onClick={() => handleDeleteSlot(slot.id)}
-                        className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 px-2 py-1 rounded-lg hover:border-red-300 transition-colors flex-shrink-0">
+                        className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 px-2 py-1.5 rounded-xl hover:border-red-300 transition-all duration-200 flex-shrink-0">
                         Remove
                       </button>
                     </div>

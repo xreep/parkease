@@ -430,8 +430,7 @@ const ParkingDetails = () => {
           <div className="flex flex-col gap-2">
             <Link
               to="/dashboard"
-              className="block text-center w-full text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
-              style={{ background: '#2563eb' }}
+              className="btn-primary block text-center w-full text-white font-semibold py-2.5 rounded-xl text-sm"
             >
               Go to Dashboard
             </Link>
@@ -480,8 +479,7 @@ const ParkingDetails = () => {
           <button
             onClick={handlePayment}
             disabled={paymentLoading}
-            className="w-full text-white font-semibold py-3 rounded-lg transition-colors text-sm shadow-sm disabled:opacity-60"
-            style={{ background: '#2563eb' }}
+            className="btn-primary w-full text-white font-semibold py-3 rounded-xl text-sm"
           >
             {paymentLoading ? 'Opening payment...' : 'Proceed to Payment'}
           </button>
@@ -495,8 +493,7 @@ const ParkingDetails = () => {
           <p className="text-gray-500 text-sm text-center py-2">Please login to book this parking.</p>
           <Link
             to="/login"
-            className="block text-center w-full text-white font-semibold py-3 rounded-lg text-sm transition-colors shadow-sm"
-            style={{ background: '#2563eb' }}
+            className="btn-primary block text-center w-full text-white font-semibold py-3 rounded-xl text-sm"
           >
             Login
           </Link>
@@ -587,8 +584,7 @@ const ParkingDetails = () => {
         <button
           type="submit"
           disabled={bookingLoading || !!blockedOverlap}
-          className="w-full text-white font-semibold py-3 rounded-lg transition-colors text-sm shadow-sm disabled:opacity-60"
-          style={{ background: '#2563eb' }}
+          className="btn-primary w-full text-white font-semibold py-3 rounded-xl text-sm pulse-blue"
         >
           {bookingLoading ? 'Processing...' : 'Book Now'}
         </button>
@@ -606,7 +602,7 @@ const ParkingDetails = () => {
           className="relative"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(15,23,42,0.72), rgba(30,58,138,0.72)), url(https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80)',
+              'linear-gradient(rgba(15,23,42,0.78), rgba(30,58,138,0.82)), url(https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -718,7 +714,7 @@ const ParkingDetails = () => {
           <div className="lg:col-span-3 space-y-5">
 
             {!isOsm && (
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover">
                 <h2 className="text-sm font-semibold text-gray-700 mb-4">Rates</h2>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
@@ -764,7 +760,7 @@ const ParkingDetails = () => {
             {isOsm && renderOsmDetails()}
 
             {(vehicleTypes.length > 0 || parking.description) && (
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4 card-hover">
                 {vehicleTypes.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Vehicles accepted</p>
@@ -791,7 +787,7 @@ const ParkingDetails = () => {
 
             {/* Availability schedule */}
             {!isOsm && schedule.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden card-hover">
                 <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Availability</p>
                   {(() => {
@@ -800,10 +796,10 @@ const ParkingDetails = () => {
                     const isOpen = today.isAvailable && nowHhmm >= today.openingTime && nowHhmm < today.closingTime
                     return (
                       <span
-                        className="text-xs font-medium px-2 py-0.5 rounded-full"
+                        className="text-xs font-medium px-2.5 py-1 rounded-full"
                         style={isOpen
-                          ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
-                          : { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }
+                          ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', boxShadow: '0 0 0 3px rgba(22,163,74,0.1)' }
+                          : { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', boxShadow: '0 0 0 3px rgba(220,38,38,0.1)' }
                         }
                       >
                         {isOpen ? 'Open now' : 'Closed now'}
@@ -875,7 +871,7 @@ const ParkingDetails = () => {
             )}
 
             {parking.latitude && parking.longitude && !isOsm && (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="px-4 py-3 border-b border-gray-100">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Location</p>
                 </div>
@@ -913,8 +909,7 @@ const ParkingDetails = () => {
                     </div>
                     <button
                       onClick={() => setNavActive(true)}
-                      className="w-full text-white font-semibold py-2.5 rounded-lg text-sm transition-colors shadow-sm"
-                      style={{ background: '#2563eb' }}
+                      className="btn-primary w-full text-white font-semibold py-2.5 rounded-xl text-sm"
                     >
                       Start Navigation
                     </button>
@@ -933,8 +928,14 @@ const ParkingDetails = () => {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm sticky top-20 overflow-hidden">
-              <div className="h-1" style={{ background: '#2563eb' }}></div>
+            <div
+              className="bg-white rounded-2xl sticky top-20 overflow-hidden"
+              style={{
+                border: '1px solid #e2e8f0',
+                borderTop: '3px solid #2563eb',
+                boxShadow: '0 -3px 20px rgba(37,99,235,0.15), 0 8px 40px rgba(0,0,0,0.08)',
+              }}
+            >
               <div className="p-5">
                 {!confirmedBooking && !pendingBooking && !isOsm && (
                   <div className="pb-4 mb-4 border-b border-gray-100">

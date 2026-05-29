@@ -4,16 +4,11 @@ import API from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 
-const DOT_GRID = {
-  backgroundImage: 'radial-gradient(#2563eb15 1px, transparent 1px)',
-  backgroundSize: '20px 20px',
-}
-
 const STATUS = {
-  PENDING:   { dot: 'bg-yellow-400', label: 'Pending',   bg: 'bg-yellow-50',  text: 'text-yellow-700', border: 'border-yellow-200' },
-  CONFIRMED: { dot: 'bg-green-500',  label: 'Confirmed', bg: 'bg-green-50',   text: 'text-green-700',  border: 'border-green-200'  },
-  CANCELLED: { dot: 'bg-red-400',    label: 'Cancelled', bg: 'bg-red-50',     text: 'text-red-600',    border: 'border-red-200'    },
-  COMPLETED: { dot: 'bg-gray-400',   label: 'Completed', bg: 'bg-gray-50',    text: 'text-gray-500',   border: 'border-gray-200'   },
+  PENDING:   { dot: 'bg-yellow-400', label: 'Pending',   bg: 'bg-yellow-50',  text: 'text-yellow-700', border: 'border-yellow-200', glow: 'rgba(217,119,6,0.15)' },
+  CONFIRMED: { dot: 'bg-green-500',  label: 'Confirmed', bg: 'bg-green-50',   text: 'text-green-700',  border: 'border-green-200',  glow: 'rgba(22,163,74,0.15)'  },
+  CANCELLED: { dot: 'bg-red-400',    label: 'Cancelled', bg: 'bg-red-50',     text: 'text-red-600',    border: 'border-red-200',    glow: 'rgba(220,38,38,0.15)'  },
+  COMPLETED: { dot: 'bg-gray-400',   label: 'Completed', bg: 'bg-gray-50',    text: 'text-gray-500',   border: 'border-gray-200',   glow: 'rgba(107,114,128,0.1)' },
 }
 
 const fmtDate = (iso) =>
@@ -100,44 +95,60 @@ const UserDashboard = () => {
   }
 
   const stats = [
-    { label: 'Total bookings', value: bookings.length, color: '#2563eb' },
-    { label: 'Confirmed',      value: bookings.filter(b => b.status === 'CONFIRMED').length, color: '#16a34a' },
-    { label: 'Pending',        value: bookings.filter(b => b.status === 'PENDING').length,   color: '#d97706' },
-    { label: 'Completed',      value: bookings.filter(b => b.status === 'COMPLETED').length, color: '#6b7280' },
+    { label: 'Total bookings', value: bookings.length, color: '#2563eb', borderColor: '#2563eb' },
+    { label: 'Confirmed',      value: bookings.filter(b => b.status === 'CONFIRMED').length, color: '#16a34a', borderColor: '#16a34a' },
+    { label: 'Pending',        value: bookings.filter(b => b.status === 'PENDING').length,   color: '#d97706', borderColor: '#d97706' },
+    { label: 'Completed',      value: bookings.filter(b => b.status === 'COMPLETED').length, color: '#6b7280', borderColor: '#6b7280' },
   ]
 
   return (
     <div className="min-h-screen" style={{ background: '#f8fafc' }}>
       <Navbar />
 
-      <div className="bg-white border-b border-gray-200" style={DOT_GRID}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ borderLeft: '3px solid #2563eb' }}>
-          <h1 className="text-xl font-bold text-gray-900">My Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{user?.name} &bull; {user?.email}</p>
+      {/* Header */}
+      <div
+        className="border-b border-gray-100"
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+          backgroundImage: 'radial-gradient(#2563eb12 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+          <div className="flex items-center gap-3 mb-1">
+            <div
+              className="w-1 h-8 rounded-full"
+              style={{ background: 'linear-gradient(180deg, #2563eb, #0ea5e9)' }}
+            ></div>
+            <h1 className="text-xl font-bold text-gray-900">My Dashboard</h1>
+          </div>
+          <p className="text-sm text-gray-500 ml-4">{user?.name} &bull; {user?.email}</p>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-7">
-          {stats.map(s => (
+          {stats.map((s, i) => (
             <div
               key={s.label}
-              className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
-              style={{ borderTop: `3px solid ${s.color}` }}
+              className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover"
+              style={{ borderTop: `3px solid ${s.borderColor}` }}
             >
-              <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
+              <p className="text-3xl font-bold mb-0.5 stat-number">{s.value}</p>
+              <p className="text-xs text-gray-400">{s.label}</p>
             </div>
           ))}
         </div>
 
+        {/* Dispute modal */}
         {disputeFor && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-4">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md shadow-xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-fadeInUp">
               <h3 className="font-semibold text-gray-900 mb-1">Raise a dispute</h3>
               <p className="text-xs text-gray-500 mb-4">Describe the issue. An admin will review it.</p>
               {disputeError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm mb-3">
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-3 py-2 text-sm mb-3">
                   {disputeError}
                 </div>
               )}
@@ -147,22 +158,21 @@ const UserDashboard = () => {
                   onChange={e => setDisputeMsg(e.target.value)}
                   rows={4}
                   placeholder="Describe the issue..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none input-modern"
                   required
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setDisputeFor(null)}
-                    className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2 rounded-lg hover:border-gray-400 transition-colors"
+                    className="flex-1 border border-gray-200 text-gray-700 text-sm font-medium py-2.5 rounded-xl hover:border-gray-300 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={disputeLoading}
-                    className="flex-1 text-white text-sm font-medium py-2 rounded-lg transition-colors shadow-sm disabled:opacity-60"
-                    style={{ background: '#2563eb' }}
+                    className="btn-primary flex-1 text-white text-sm font-medium py-2.5 rounded-xl"
                   >
                     {disputeLoading ? 'Submitting...' : 'Submit dispute'}
                   </button>
@@ -172,10 +182,11 @@ const UserDashboard = () => {
           </div>
         )}
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {/* Bookings */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-900">My Bookings</h2>
-            <Link to="/search" className="text-xs font-medium hover:underline" style={{ color: '#2563eb' }}>
+            <Link to="/search" className="text-xs font-semibold hover:underline transition-colors" style={{ color: '#2563eb' }}>
               Find parking
             </Link>
           </div>
@@ -193,8 +204,7 @@ const UserDashboard = () => {
               <p className="text-gray-400 text-sm mb-4">No bookings yet.</p>
               <Link
                 to="/search"
-                className="text-sm text-white px-4 py-2 rounded-lg font-medium shadow-sm"
-                style={{ background: '#2563eb' }}
+                className="btn-primary inline-block text-sm text-white px-5 py-2.5 rounded-xl font-medium"
               >
                 Find parking
               </Link>
@@ -202,21 +212,27 @@ const UserDashboard = () => {
           )}
 
           {!loading && bookings.length > 0 && (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gray-50">
               {bookings.map(b => {
                 const s = STATUS[b.status] || STATUS.PENDING
                 const disputeStatus = disputes[b.id]
                 const duration = calcDuration(b.startTime, b.endTime)
                 const canCancel = b.status === 'PENDING' || b.status === 'CONFIRMED'
                 return (
-                  <div key={b.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div
+                    key={b.id}
+                    className="px-6 py-4 transition-colors duration-150 hover:bg-gray-50/80"
+                  >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <p className="font-semibold text-gray-900 text-sm truncate">
                             {b.parking?.title || `Booking #${b.id.slice(0, 8)}`}
                           </p>
-                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border flex-shrink-0 ${s.bg} ${s.text} ${s.border}`}>
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border flex-shrink-0 ${s.bg} ${s.text} ${s.border}`}
+                            style={{ boxShadow: `0 0 0 2px ${s.glow}` }}
+                          >
                             <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`}></span>
                             {s.label}
                           </span>
@@ -232,7 +248,7 @@ const UserDashboard = () => {
                         <div className="flex items-center gap-3 text-xs text-gray-400">
                           {duration && <span>{duration} hrs</span>}
                           {b.totalAmount != null && (
-                            <span className="font-semibold text-gray-900">
+                            <span className="font-bold text-gray-900">
                               Rs. {parseFloat(b.totalAmount).toFixed(0)}
                             </span>
                           )}
@@ -243,7 +259,7 @@ const UserDashboard = () => {
                           <button
                             onClick={() => handleCancel(b.id)}
                             disabled={cancelling === b.id}
-                            className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:border-red-300 hover:text-red-600 transition-colors disabled:opacity-50"
+                            className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-xl hover:border-red-300 hover:text-red-600 transition-all duration-200 disabled:opacity-50"
                           >
                             {cancelling === b.id ? 'Cancelling...' : 'Cancel'}
                           </button>
@@ -256,7 +272,7 @@ const UserDashboard = () => {
                           ) : (
                             <button
                               onClick={() => { setDisputeFor(b.id); setDisputeMsg(''); setDisputeError('') }}
-                              className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:border-gray-300 transition-colors"
+                              className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-xl hover:border-gray-300 transition-all duration-200"
                             >
                               Dispute
                             </button>

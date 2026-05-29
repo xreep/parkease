@@ -3,11 +3,6 @@ import { useNavigate, Link } from 'react-router-dom'
 import API from '../utils/api'
 import Navbar from '../components/Navbar'
 
-const DOT_GRID = {
-  backgroundImage: 'radial-gradient(#2563eb15 1px, transparent 1px)',
-  backgroundSize: '20px 20px',
-}
-
 const VEHICLE_OPTIONS = [
   { value: 'FOUR_WHEELER', label: 'Four Wheeler (Car / SUV)' },
   { value: 'TWO_WHEELER', label: 'Two Wheeler (Bike / Scooter)' },
@@ -31,7 +26,7 @@ const defaultSchedule = () =>
     isAvailable: true,
   }))
 
-const inp = 'w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm'
+const inp = 'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none text-sm input-modern bg-white'
 
 const Field = ({ label, required, hint, children }) => (
   <div>
@@ -44,7 +39,10 @@ const Field = ({ label, required, hint, children }) => (
 )
 
 const Card = ({ title, children }) => (
-  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
+  <div
+    className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4 card-hover"
+    style={{ transition: 'box-shadow 0.2s ease, transform 0.2s ease' }}
+  >
     <h2 className="text-sm font-semibold text-gray-800 pb-3 border-b border-gray-100">{title}</h2>
     {children}
   </div>
@@ -163,9 +161,12 @@ const AddParking = () => {
     <div className="min-h-screen" style={{ background: '#f8fafc' }}>
       <Navbar />
       <div className="max-w-md mx-auto px-4 py-20 text-center">
-        <div className="bg-white border border-gray-200 rounded-2xl p-10 shadow-sm">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white border border-gray-200 rounded-2xl p-10 shadow-sm animate-fadeInUp">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: 'linear-gradient(135deg, #16a34a, #22c55e)' }}
+          >
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -174,7 +175,7 @@ const AddParking = () => {
             Your parking space has been submitted. An admin will review and approve it shortly.
           </p>
           <div className="flex justify-center gap-3">
-            <Link to="/owner/dashboard" className="text-white font-semibold px-5 py-2 rounded-lg text-sm shadow-sm" style={{ background: '#2563eb' }}>
+            <Link to="/owner/dashboard" className="btn-primary text-white font-semibold px-5 py-2.5 rounded-xl text-sm">
               Go to Dashboard
             </Link>
           </div>
@@ -187,9 +188,17 @@ const AddParking = () => {
     <div className="min-h-screen" style={{ background: '#f8fafc' }}>
       <Navbar />
 
-      <div className="bg-white border-b border-gray-200" style={DOT_GRID}>
+      {/* Page header */}
+      <div
+        className="border-b border-gray-100"
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+          backgroundImage: 'radial-gradient(#2563eb12 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }}
+      >
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link to="/owner/dashboard" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          <Link to="/owner/dashboard" className="text-sm text-gray-400 hover:text-blue-600 transition-colors duration-200">
             &larr; Back to dashboard
           </Link>
           <h1 className="text-xl font-bold text-gray-900 mt-2">List your parking space</h1>
@@ -199,12 +208,12 @@ const AddParking = () => {
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-5 text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm">
             {error}
           </div>
         )}
         {photoNotice && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg px-4 py-3 mb-5 text-sm">
+          <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded-xl px-4 py-3 mb-5 text-sm">
             {photoNotice}
           </div>
         )}
@@ -228,7 +237,7 @@ const AddParking = () => {
             {photoPreviews.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-1">
                 {photoPreviews.map((src, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 group">
                     <img src={src} alt="" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -243,7 +252,7 @@ const AddParking = () => {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors"
+                    className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -256,12 +265,12 @@ const AddParking = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-300 rounded-xl py-8 flex flex-col items-center gap-2 text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors"
+                className="w-full border-2 border-dashed border-gray-200 rounded-2xl py-8 flex flex-col items-center gap-2 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-all duration-200"
               >
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4-4a3 3 0 014.24 0L16 16m-2-2l1.59-1.59a3 3 0 014.24 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="text-sm">Click to add photos</span>
+                <span className="text-sm font-medium">Click to add photos</span>
               </button>
             )}
             <input
@@ -305,10 +314,11 @@ const AddParking = () => {
               <div className="space-y-2">
                 {VEHICLE_OPTIONS.map((opt) => (
                   <label key={opt.value}
-                    className="flex items-center gap-3 border-2 rounded-xl px-4 py-3 cursor-pointer transition-all"
+                    className="flex items-center gap-3 border-2 rounded-2xl px-4 py-3 cursor-pointer transition-all duration-200"
                     style={{
-                      borderColor: form.vehicleTypes.includes(opt.value) ? '#2563eb' : '#e5e7eb',
+                      borderColor: form.vehicleTypes.includes(opt.value) ? '#2563eb' : '#e2e8f0',
                       background: form.vehicleTypes.includes(opt.value) ? '#eff6ff' : '#fff',
+                      boxShadow: form.vehicleTypes.includes(opt.value) ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none',
                     }}>
                     <input
                       type="checkbox"
@@ -329,10 +339,11 @@ const AddParking = () => {
               <div className="grid grid-cols-2 gap-2">
                 {SLOT_SIZES.map((s) => (
                   <label key={s.value}
-                    className="flex items-start gap-2.5 border-2 rounded-xl px-3 py-2.5 cursor-pointer transition-all"
+                    className="flex items-start gap-2.5 border-2 rounded-2xl px-3 py-2.5 cursor-pointer transition-all duration-200"
                     style={{
-                      borderColor: form.slotSize === s.value ? '#2563eb' : '#e5e7eb',
+                      borderColor: form.slotSize === s.value ? '#2563eb' : '#e2e8f0',
                       background: form.slotSize === s.value ? '#eff6ff' : '#fff',
+                      boxShadow: form.slotSize === s.value ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none',
                     }}>
                     <input
                       type="radio"
@@ -378,7 +389,6 @@ const AddParking = () => {
             </div>
           </Card>
 
-          {/* Availability schedule */}
           <Card title="Availability schedule">
             <p className="text-xs text-gray-400 -mt-2">Set hours for each day of the week. Bookings outside these hours will be blocked.</p>
             <div className="space-y-2">
@@ -390,11 +400,11 @@ const AddParking = () => {
                   <button
                     type="button"
                     onClick={() => updateScheduleDay(day.dayOfWeek, 'isAvailable', !day.isAvailable)}
-                    className="relative flex-shrink-0 w-9 h-5 rounded-full transition-colors"
+                    className="relative flex-shrink-0 w-9 h-5 rounded-full transition-colors duration-200"
                     style={{ background: day.isAvailable ? '#2563eb' : '#d1d5db' }}
                   >
                     <span
-                      className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                      className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
                       style={{ transform: day.isAvailable ? 'translateX(18px)' : 'translateX(2px)' }}
                     />
                   </button>
@@ -404,14 +414,14 @@ const AddParking = () => {
                         type="time"
                         value={day.openingTime}
                         onChange={(e) => updateScheduleDay(day.dayOfWeek, 'openingTime', e.target.value)}
-                        className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
+                        className="border border-gray-200 rounded-xl px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
                       />
                       <span className="text-gray-400 text-xs">to</span>
                       <input
                         type="time"
                         value={day.closingTime}
                         onChange={(e) => updateScheduleDay(day.dayOfWeek, 'closingTime', e.target.value)}
-                        className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
+                        className="border border-gray-200 rounded-xl px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
                       />
                     </div>
                   ) : (
@@ -425,11 +435,11 @@ const AddParking = () => {
           <Card title="Settings">
             <label className="flex items-center gap-3 cursor-pointer">
               <div
-                className="w-10 h-5 rounded-full relative transition-colors flex-shrink-0"
+                className="w-10 h-5 rounded-full relative transition-colors duration-200 flex-shrink-0"
                 style={{ background: form.autoApproveBookings ? '#2563eb' : '#d1d5db' }}
                 onClick={() => setForm({ ...form, autoApproveBookings: !form.autoApproveBookings })}
               >
-                <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 shadow transition-transform"
+                <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 shadow transition-transform duration-200"
                   style={{ transform: form.autoApproveBookings ? 'translateX(20px)' : 'translateX(2px)' }}></div>
               </div>
               <div>
@@ -440,8 +450,7 @@ const AddParking = () => {
           </Card>
 
           <button type="submit" disabled={loading}
-            className="w-full text-white font-semibold py-3 rounded-xl transition-colors text-sm shadow-sm disabled:opacity-60"
-            style={{ background: loading ? '#6b7280' : '#2563eb' }}>
+            className="btn-primary w-full text-white font-semibold py-3.5 rounded-2xl text-sm">
             {loading ? 'Submitting...' : 'Submit listing for approval'}
           </button>
         </form>

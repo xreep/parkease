@@ -3,11 +3,6 @@ import API from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 
-const DOT_GRID = {
-  backgroundImage: 'radial-gradient(#2563eb15 1px, transparent 1px)',
-  backgroundSize: '20px 20px',
-}
-
 const STATUS = {
   PENDING:   { dot: 'bg-yellow-400', text: 'text-yellow-700', bg: 'bg-yellow-50',  border: 'border-yellow-200', label: 'Pending'   },
   CONFIRMED: { dot: 'bg-green-500',  text: 'text-green-700',  bg: 'bg-green-50',   border: 'border-green-200',  label: 'Confirmed' },
@@ -93,10 +88,22 @@ const AdminDashboard = () => {
       <Navbar />
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-200" style={DOT_GRID}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{user?.name} &bull; {user?.email}</p>
+      <div
+        className="border-b border-gray-100"
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+          backgroundImage: 'radial-gradient(#2563eb12 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(180deg, #7c3aed, #2563eb)' }}></div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-sm text-gray-500 mt-0.5">{user?.name} &bull; {user?.email}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -110,9 +117,15 @@ const AdminDashboard = () => {
             { label: 'Bookings',       value: stats?.totalBookings ?? allBookings.length, color: '#d97706' },
             { label: 'Pending review', value: pendingListings.length, color: pendingListings.length > 0 ? '#dc2626' : '#6b7280', warn: true },
           ].map(s => (
-            <div key={s.label} className={`rounded-xl p-4 shadow-sm border ${s.warn && pendingListings.length > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}
-              style={{ borderTop: `3px solid ${s.color}` }}>
-              <p className="text-2xl font-bold" style={{ color: s.warn && pendingListings.length > 0 ? '#dc2626' : '#0f172a' }}>{s.value}</p>
+            <div
+              key={s.label}
+              className={`rounded-2xl p-5 shadow-sm border card-hover ${s.warn && pendingListings.length > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}
+              style={{ borderTop: `3px solid ${s.color}` }}
+            >
+              <p className="text-3xl font-bold mb-0.5 stat-number"
+                style={s.warn && pendingListings.length > 0 ? { background: 'none', WebkitTextFillColor: '#dc2626', color: '#dc2626' } : {}}>
+                {s.value}
+              </p>
               <p className="text-xs mt-0.5" style={{ color: s.warn && pendingListings.length > 0 ? '#b91c1c' : '#94a3b8' }}>{s.label}</p>
             </div>
           ))}
@@ -126,7 +139,7 @@ const AdminDashboard = () => {
                 : t.key === 'disputes' ? disputes.filter(d => d.status === 'PENDING').length : 0
               return (
                 <button key={t.key} onClick={() => setActiveTab(t.key)}
-                  className="px-5 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                  className="px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap"
                   style={{
                     borderBottomColor: activeTab === t.key ? '#2563eb' : 'transparent',
                     color: activeTab === t.key ? '#2563eb' : '#6b7280',
@@ -143,7 +156,7 @@ const AdminDashboard = () => {
 
         {/* Pending listings */}
         {activeTab === 'pending' && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">Pending Listings</h2>
               <p className="text-xs text-gray-400 mt-0.5">Review and approve owner submissions before they go live.</p>
@@ -156,7 +169,7 @@ const AdminDashboard = () => {
                   <thead><tr className="border-b border-gray-100"><TH>Title</TH><TH>Owner</TH><TH>City</TH><TH>Price</TH><TH>Vehicles</TH><TH></TH></tr></thead>
                   <tbody className="divide-y divide-gray-50">
                     {pendingListings.map(l => (
-                      <tr key={l.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={l.id} className="hover:bg-gray-50/80 transition-colors duration-150">
                         <td className="px-6 py-4">
                           <p className="font-medium text-gray-900">{l.title}</p>
                           <p className="text-xs text-gray-400 mt-0.5 max-w-xs truncate">{l.address}</p>
@@ -173,12 +186,11 @@ const AdminDashboard = () => {
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
                             <button onClick={() => handleReject(l.id)} disabled={!!actionLoading}
-                              className="text-xs text-gray-500 border border-gray-200 px-2.5 py-1.5 rounded-lg hover:border-red-300 hover:text-red-600 transition-colors disabled:opacity-50">
+                              className="text-xs text-gray-500 border border-gray-200 px-2.5 py-1.5 rounded-xl hover:border-red-300 hover:text-red-600 transition-all duration-200 disabled:opacity-50">
                               {actionLoading === `reject-${l.id}` ? '...' : 'Reject'}
                             </button>
                             <button onClick={() => handleApprove(l.id)} disabled={!!actionLoading}
-                              className="text-xs text-white px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
-                              style={{ background: '#2563eb' }}>
+                              className="btn-primary text-xs text-white px-2.5 py-1.5 rounded-xl disabled:opacity-50">
                               {actionLoading === `approve-${l.id}` ? '...' : 'Approve'}
                             </button>
                           </div>
@@ -194,7 +206,7 @@ const AdminDashboard = () => {
 
         {/* Users */}
         {activeTab === 'users' && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">All Users</h2>
               <p className="text-xs text-gray-400 mt-0.5">{allUsers.length} registered accounts</p>
@@ -204,7 +216,7 @@ const AdminDashboard = () => {
                 <thead><tr className="border-b border-gray-100"><TH>Name</TH><TH>Email</TH><TH>Phone</TH><TH>Role</TH><TH>Joined</TH></tr></thead>
                 <tbody className="divide-y divide-gray-50">
                   {allUsers.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={u.id} className="hover:bg-gray-50/80 transition-colors duration-150">
                       <td className="px-6 py-4 font-medium text-gray-900">{u.name}</td>
                       <td className="px-6 py-4 text-gray-600">{u.email}</td>
                       <td className="px-6 py-4 text-gray-400">{u.phone || '-'}</td>
@@ -230,7 +242,7 @@ const AdminDashboard = () => {
 
         {/* Bookings */}
         {activeTab === 'bookings' && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">All Bookings</h2>
               <p className="text-xs text-gray-400 mt-0.5">{allBookings.length} total</p>
@@ -242,7 +254,7 @@ const AdminDashboard = () => {
                   {allBookings.map(b => {
                     const s = STATUS[b.status] || STATUS.PENDING
                     return (
-                      <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={b.id} className="hover:bg-gray-50/80 transition-colors duration-150">
                         <td className="px-6 py-4">
                           <p className="font-medium text-gray-900">{b.parking?.title || '-'}</p>
                           <p className="text-xs text-gray-400">{b.parking?.city}</p>
@@ -272,7 +284,7 @@ const AdminDashboard = () => {
 
         {/* Disputes */}
         {activeTab === 'disputes' && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">Disputes</h2>
               <p className="text-xs text-gray-400 mt-0.5">{disputes.length} total &bull; {disputes.filter(d => d.status === 'PENDING').length} open</p>
@@ -287,7 +299,7 @@ const AdminDashboard = () => {
                     {disputes.map(d => {
                       const s = STATUS[d.status] || STATUS.PENDING
                       return (
-                        <tr key={d.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={d.id} className="hover:bg-gray-50/80 transition-colors duration-150">
                           <td className="px-6 py-4">
                             <p className="font-medium text-gray-900">{d.user?.name || '-'}</p>
                             <p className="text-xs text-gray-400">{d.user?.email}</p>
@@ -306,8 +318,7 @@ const AdminDashboard = () => {
                           <td className="px-6 py-4">
                             {d.status === 'PENDING' && (
                               <button onClick={() => handleResolveDispute(d.id)} disabled={!!actionLoading}
-                                className="text-xs text-white px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
-                                style={{ background: '#2563eb' }}>
+                                className="btn-primary text-xs text-white px-2.5 py-1.5 rounded-xl disabled:opacity-50">
                                 {actionLoading === `resolve-${d.id}` ? '...' : 'Resolve'}
                               </button>
                             )}
@@ -332,22 +343,22 @@ const AdminDashboard = () => {
                 { label: 'Completed', value: reports?.bookingsByStatus?.COMPLETED ?? 0, color: '#16a34a' },
                 { label: 'Cancelled', value: reports?.bookingsByStatus?.CANCELLED ?? 0, color: '#dc2626' },
               ].map(s => (
-                <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+                <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover"
                   style={{ borderTop: `3px solid ${s.color}` }}>
-                  <p className="text-2xl font-bold text-gray-900">{s.value}</p>
+                  <p className="text-3xl font-bold mb-0.5 stat-number">{s.value}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
 
             {reports?.bookingsByStatus && (
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Bookings by status</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {Object.entries(reports.bookingsByStatus).map(([status, count]) => {
                     const s = STATUS[status] || STATUS.PENDING
                     return (
-                      <div key={status} className={`border rounded-xl p-4 text-center ${s.bg} ${s.border}`}>
+                      <div key={status} className={`border rounded-2xl p-4 text-center ${s.bg} ${s.border}`}>
                         <p className={`text-2xl font-bold mb-1 ${s.text}`}>{count}</p>
                         <span className={`text-xs font-medium ${s.text}`}>{s.label}</span>
                       </div>
@@ -358,7 +369,7 @@ const AdminDashboard = () => {
             )}
 
             <div className="grid sm:grid-cols-2 gap-5">
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h3 className="text-sm font-semibold text-gray-900">Top cities</h3>
                 </div>
@@ -369,7 +380,7 @@ const AdminDashboard = () => {
                     <thead><tr className="border-b border-gray-100"><TH>City</TH><TH>Bookings</TH></tr></thead>
                     <tbody className="divide-y divide-gray-50">
                       {reports.topCities.map((c, i) => (
-                        <tr key={c.city} className="hover:bg-gray-50 transition-colors">
+                        <tr key={c.city} className="hover:bg-gray-50/80 transition-colors">
                           <td className="px-6 py-3 text-gray-700">
                             <span className="text-gray-300 mr-2 text-xs font-medium">{i + 1}</span>{c.city}
                           </td>
@@ -380,7 +391,7 @@ const AdminDashboard = () => {
                   </table>
                 )}
               </div>
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h3 className="text-sm font-semibold text-gray-900">Top listings</h3>
                 </div>
@@ -391,7 +402,7 @@ const AdminDashboard = () => {
                     <thead><tr className="border-b border-gray-100"><TH>Listing</TH><TH>Bookings</TH></tr></thead>
                     <tbody className="divide-y divide-gray-50">
                       {reports.topListings.map((l, i) => (
-                        <tr key={l.title} className="hover:bg-gray-50 transition-colors">
+                        <tr key={l.title} className="hover:bg-gray-50/80 transition-colors">
                           <td className="px-6 py-3 text-gray-700">
                             <span className="text-gray-300 mr-2 text-xs font-medium">{i + 1}</span>{l.title}
                           </td>

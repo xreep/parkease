@@ -250,12 +250,17 @@ const SearchParking = () => {
   const osmResults = results.filter(p => p.source === 'osm')
   const hasTimeFilter = date || startTime || endTime
 
+  const inputClass = "border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white transition-all duration-200"
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
 
-      {/* Search bar */}
-      <div className="bg-white border-b border-gray-200 py-4 flex-shrink-0">
+      {/* Search bar — glass morphism on light blue */}
+      <div
+        className="flex-shrink-0 py-4 border-b border-blue-100/50"
+        style={{ background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)' }}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <form onSubmit={handleSearch} className="flex flex-col sm:flex-row sm:items-end gap-2">
             <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -265,7 +270,7 @@ const SearchParking = () => {
                 placeholder="Mumbai, Delhi, Bangalore..."
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                className={inputClass}
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -273,7 +278,7 @@ const SearchParking = () => {
               <select
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                className={inputClass}
               >
                 <option value="">All vehicles</option>
                 <option value="TWO_WHEELER">Two Wheeler</option>
@@ -286,7 +291,7 @@ const SearchParking = () => {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                className={inputClass}
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -295,7 +300,7 @@ const SearchParking = () => {
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                className={inputClass}
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -304,14 +309,14 @@ const SearchParking = () => {
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+                className={inputClass}
               />
             </div>
             {hasTimeFilter && (
               <button
                 type="button"
                 onClick={() => { setDate(''); setStartTime(''); setEndTime('') }}
-                className="text-xs text-gray-400 hover:text-gray-600 underline whitespace-nowrap sm:mb-0.5"
+                className="text-xs text-gray-400 hover:text-gray-600 underline whitespace-nowrap sm:mb-0.5 transition-colors"
               >
                 Clear
               </button>
@@ -319,7 +324,7 @@ const SearchParking = () => {
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold px-6 py-2 rounded-lg transition-colors text-sm whitespace-nowrap shadow-sm"
+              className="btn-primary text-white font-semibold px-6 py-2.5 rounded-xl text-sm whitespace-nowrap"
             >
               {loading ? 'Searching...' : 'Search'}
             </button>
@@ -361,7 +366,7 @@ const SearchParking = () => {
 
       {!loading && error && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="border border-amber-200 bg-amber-50 text-amber-800 rounded-lg px-4 py-3 text-sm">{error}</div>
+          <div className="border border-amber-200 bg-amber-50 text-amber-800 rounded-xl px-4 py-3 text-sm">{error}</div>
         </div>
       )}
 
@@ -370,7 +375,7 @@ const SearchParking = () => {
         <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 185px)' }}>
 
           {/* Left: scrollable cards */}
-          <div className="w-full lg:w-[55%] overflow-y-auto border-r border-gray-200 bg-gray-50 flex-shrink-0">
+          <div className="w-full lg:w-[55%] overflow-y-auto border-r border-gray-100 flex-shrink-0" style={{ background: '#f8fafc' }}>
             <div className="p-4 space-y-3">
               {results.map((spot) => {
                 const types = spot.supportedVehicleTypes || spot.vehicleTypes || []
@@ -381,10 +386,17 @@ const SearchParking = () => {
                 return (
                   <div
                     key={spot.id}
-                    className="bg-white rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white rounded-2xl p-4 card-hover cursor-pointer transition-all duration-200"
                     style={{
                       border: '1px solid #e2e8f0',
-                      borderLeft: isDb ? '3px solid #16a34a' : '3px solid #2563eb',
+                      borderLeft: isDb ? '3px solid #2563eb' : '3px solid #94a3b8',
+                      boxShadow: isDb ? '-3px 0 0 0 #2563eb, 0 2px 8px rgba(0,0,0,0.04)' : '0 2px 8px rgba(0,0,0,0.04)',
+                    }}
+                    onMouseEnter={e => {
+                      if (isDb) e.currentTarget.style.boxShadow = '-3px 0 15px rgba(37,99,235,0.2), 0 12px 40px rgba(37,99,235,0.12)'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.boxShadow = isDb ? '-3px 0 0 0 #2563eb, 0 2px 8px rgba(0,0,0,0.04)' : '0 2px 8px rgba(0,0,0,0.04)'
                     }}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -392,7 +404,7 @@ const SearchParking = () => {
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         {isDb && openStatus !== null && (
                           <span
-                            className="text-xs px-1.5 py-0.5 rounded font-medium"
+                            className="text-xs px-2 py-0.5 rounded-full font-medium"
                             style={openStatus
                               ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
                               : { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }
@@ -402,11 +414,11 @@ const SearchParking = () => {
                           </span>
                         )}
                         <span
-                          className="text-xs px-1.5 py-0.5 rounded font-medium"
+                          className="text-xs px-2 py-0.5 rounded-full font-medium"
                           style={{
-                            background: isDb ? '#f0fdf4' : '#eff6ff',
-                            color: isDb ? '#16a34a' : '#2563eb',
-                            border: `1px solid ${isDb ? '#bbf7d0' : '#bfdbfe'}`,
+                            background: isDb ? '#eff6ff' : '#f8fafc',
+                            color: isDb ? '#2563eb' : '#64748b',
+                            border: `1px solid ${isDb ? '#bfdbfe' : '#e2e8f0'}`,
                           }}
                         >
                           {isDb ? 'Bookable' : 'OSM'}
@@ -448,10 +460,10 @@ const SearchParking = () => {
                       <Link
                         to={`/parking/${spot.id}`}
                         state={{ parking: spot }}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                        className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap"
                         style={isDb
-                          ? { background: '#2563eb', color: '#fff' }
-                          : { border: '1px solid #d1d5db', color: '#374151' }
+                          ? { background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#fff', boxShadow: '0 4px 12px rgba(37,99,235,0.25)' }
+                          : { border: '1px solid #e2e8f0', color: '#374151' }
                         }
                       >
                         {isDb ? 'Book now' : 'View'}
@@ -468,7 +480,7 @@ const SearchParking = () => {
           </div>
 
           {/* Right: sticky map */}
-          <div className="hidden lg:block flex-1 bg-gray-100 relative">
+          <div className="hidden lg:block flex-1 relative" style={{ borderRadius: '0 0 0 0' }}>
             {mapParkings.length > 0 ? (
               <MapView
                 parkings={mapParkings}
@@ -477,7 +489,7 @@ const SearchParking = () => {
                 style={{ height: '100%', width: '100%' }}
               />
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-sm">No map data</div>
+              <div className="flex items-center justify-center h-full text-gray-400 text-sm bg-gray-50">No map data</div>
             )}
           </div>
         </div>
