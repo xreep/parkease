@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(USER)
+  phone       String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  vehicles    Vehicle[]
+  bookings    Booking[]
+  disputes    Dispute[]
+  parkings    ParkingListing[]
+}
+
+enum Role {
+  USER
+  OWNER
+  ADMIN
+}
+
+model Vehicle {
+  id            String      @id @default(cuid())
+  userId        String
+  vehicleNumber String
+  vehicleType   VehicleType
+  user          User        @relation(fields: [userId], references: [id])
+  bookings      Booking[]
+}
+
+enum VehicleType {
+  TWO_WHEELER
+  FOUR_WHEELER
+}
+
+model ParkingListing {
+  id                    String                 @id @default(cuid())
+  ownerId               String
+  title                 String
+  description           String?
+  address               String
+  city                  String
+  latitude              Float
+  longitude             Float
+  photos                String[]
+  totalSlots            Int
+  supportedVehicleTypes VehicleType[]
+  hourlyPrice           Float
+  dailyPrice            Float?
+  monthlyPrice          Float?
+  slotSize              String                 @default("MEDIUM")
+  approvalStatus        ApprovalStatus         @default(PENDING)
+  autoApproveBookings   Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  owner                 User                   @relation(fields: [ownerId], references: [id])
+  bookings              Booking[]
+  blockedSlots          BlockedSlot[]
+  availabilitySchedule  AvailabilitySchedule[]
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AvailabilitySchedule {
+  id               String         @id @default(cuid())
+  parkingListingId String
+  dayOfWeek        Int
+  openingTime      String
+  closingTime      String
+  isAvailable      Boolean        @default(true)
+  parking          ParkingListing @relation(fields: [parkingListingId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id               String         @id @default(cuid())
+  userId           String
+  parkingListingId String
+  vehicleId        String
+  startTime        DateTime
+  endTime          DateTime
+  vehicleType      VehicleType
+  totalAmount      Float
+  status           BookingStatus  @default(PENDING)
+  paymentId        String?
+  createdAt        DateTime       @default(now())
+  user             User           @relation(fields: [userId], references: [id])
+  parking          ParkingListing @relation(fields: [parkingListingId], references: [id])
+  vehicle          Vehicle        @relation(fields: [vehicleId], references: [id])
+  dispute          Dispute?
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model BlockedSlot {
+  id               String         @id @default(cuid())
+  parkingListingId String
+  blockedDate      DateTime
+  startTime        DateTime
+  endTime          DateTime
+  reason           String?
+  parking          ParkingListing @relation(fields: [parkingListingId], references: [id])
+}
+
+model Dispute {
+  id        String        @id @default(cuid())
+  bookingId String        @unique
+  userId    String
+  message   String
+  status    DisputeStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  booking   Booking       @relation(fields: [bookingId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+}
+
+enum DisputeStatus {
+  PENDING
+  RESOLVED
+}
