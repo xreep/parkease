@@ -142,6 +142,7 @@ const SearchParking = () => {
   const [mapCenter, setMapCenter] = useState(null)
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
+  const [osmLoading, setOsmLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
 
@@ -170,21 +171,37 @@ const SearchParking = () => {
 
   const fetchSearch = async (c, v, d, st, et) => {
     if (!c.trim()) { fetchDbOnly(v, d, st, et); return }
-    setLoading(true); setLoadingMsg('Locating city...'); setError(''); setResults([])
+    setLoading(true); setLoadingMsg('Loading parking spaces...'); setError(''); setResults([])
+    let dbList = []
+    let coords = null
     try {
       const apiParams = { city: c, ...buildApiParams(v, d, st, et) }
-      const [coords, dbRes] = await Promise.all([
+      const [coordsResult, dbRes] = await Promise.all([
         geocodeCity(c),
         API.get('/parkings/search', { params: apiParams }).catch(() => ({ data: [] })),
       ])
-      const dbList = (Array.isArray(dbRes.data) ? dbRes.data : []).map(p => ({ ...p, source: 'db' }))
-      if (!coords) {
-        if (dbList.length > 0) setResults(dbList)
-        else setError(`Could not locate "${c}" on the map. Try a major city name.`)
-        setLoading(false); setSearched(true); return
+      coords = coordsResult
+      dbList = (Array.isArray(dbRes.data) ? dbRes.data : []).map(p => ({ ...p, source: 'db' }))
+      if (coords) setMapCenter([coords.lat, coords.lon])
+      setResults(dbList)
+      setLoading(false)
+      setSearched(true)
+      setLoadingMsg('')
+      if (!coords && dbList.length === 0) {
+        setError(`Could not locate "${c}" on the map. Try a major city name.`)
+        return
       }
-      setMapCenter([coords.lat, coords.lon])
-      setLoadingMsg('Searching OpenStreetMap...')
+    } catch {
+      setError('Could not fetch parking data. Please try again.')
+      setResults([])
+      setLoading(false)
+      setSearched(true)
+      setLoadingMsg('')
+      return
+    }
+    if (!coords) return
+    setOsmLoading(true)
+    try {
       const [overpassEls, nominatimItems] = await Promise.all([
         fetchOverpass(coords.lat, coords.lon),
         fetchNominatimParking(c),
@@ -201,9 +218,8 @@ const SearchParking = () => {
       )
       setResults([...dbList, ...osmFiltered])
     } catch {
-      setError('Could not fetch parking data. Please try again.'); setResults([])
     } finally {
-      setLoading(false); setSearched(true); setLoadingMsg('')
+      setOsmLoading(false)
     }
   }
 
@@ -312,18 +328,24 @@ const SearchParking = () => {
       </div>
 
       {/* Info banner */}
-      {searched && !loading && results.length > 0 && (
+      {searched && !loading && (results.length > 0 || osmLoading) && (
         <div className="flex-shrink-0" style={{ background: '#2563eb' }}>
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-blue-100">
-              Showing real parking locations from OpenStreetMap and verified listings
+              {osmLoading ? 'Showing verified listings — also searching OpenStreetMap...' : 'Showing verified listings and OpenStreetMap locations'}
               {city && ` near ${city}`}
               {hasTimeFilter && date && ` on ${date}`}
               {hasTimeFilter && startTime && endTime && ` from ${startTime} to ${endTime}`}
             </p>
-            <div className="flex gap-3 text-xs text-blue-100">
+            <div className="flex items-center gap-3 text-xs text-blue-100">
               {dbResults.length > 0 && <span>{dbResults.length} bookable</span>}
-              {osmResults.length > 0 && <span>{osmResults.length} from OpenStreetMap</span>}
+              {osmResults.length > 0 && <span>{osmResults.length} from OSM</span>}
+              {osmLoading && (
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 border border-blue-200 border-t-transparent rounded-full animate-spin inline-block"></span>
+                  Loading OSM...
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -344,7 +366,7 @@ const SearchParking = () => {
       )}
 
       {/* Split layout */}
-      {!loading && searched && results.length > 0 && (
+      {!loading && searched && (results.length > 0 || osmLoading) && (
         <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 185px)' }}>
 
           {/* Left: scrollable cards */}
@@ -462,7 +484,7 @@ const SearchParking = () => {
       )}
 
       {/* Mobile map */}
-      {!loading && searched && results.length > 0 && mapParkings.length > 0 && (
+      {!loading && searched && (results.length > 0 || osmLoading) && mapParkings.length > 0 && (
         <div className="lg:hidden border-t border-gray-200" style={{ height: '300px' }}>
           <MapView
             parkings={mapParkings}
