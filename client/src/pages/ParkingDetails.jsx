@@ -13,10 +13,19 @@ const VEHICLE_LABELS = {
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const SLOT_SIZE_LABELS = {
-  COMPACT: 'Compact',
+  SMALL: 'Small',
+  COMPACT: 'Small',
   MEDIUM: 'Medium',
   LARGE: 'Large',
   EXTRA_LARGE: 'Extra Large',
+}
+
+const SLOT_SIZE_DESC = {
+  SMALL: 'Suitable for motorcycles and scooters',
+  COMPACT: 'Suitable for motorcycles and scooters',
+  MEDIUM: 'Suitable for hatchbacks and sedans',
+  LARGE: 'Suitable for SUVs and MUVs',
+  EXTRA_LARGE: 'Suitable for trucks and large vehicles',
 }
 
 const nowLocal = () => {
@@ -734,9 +743,14 @@ const ParkingDetails = () => {
                     <p className="text-xs text-gray-400">{parking.totalSlots} total slots</p>
                   )}
                   {parking.slotSize && (
-                    <p className="text-xs text-gray-400">
-                      Slot size: <span className="font-medium text-gray-600">{SLOT_SIZE_LABELS[parking.slotSize] || parking.slotSize}</span>
-                    </p>
+                    <div>
+                      <p className="text-xs text-gray-400">
+                        Slot size: <span className="font-medium text-gray-600">{SLOT_SIZE_LABELS[parking.slotSize] || parking.slotSize}</span>
+                      </p>
+                      {SLOT_SIZE_DESC[parking.slotSize] && (
+                        <p className="text-xs text-gray-400 mt-0.5">{SLOT_SIZE_DESC[parking.slotSize]}</p>
+                      )}
+                    </div>
                   )}
                   {typeof parking.autoApproveBookings === 'boolean' && (
                     <p className="text-xs" style={{ color: parking.autoApproveBookings ? '#16a34a' : '#d97706' }}>
@@ -820,6 +834,22 @@ const ParkingDetails = () => {
                       </div>
                     )
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* OSM availability */}
+            {isOsm && (
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-100">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Availability</p>
+                </div>
+                <div className="px-5 py-4">
+                  {parking.openingHours ? (
+                    <p className="text-sm text-gray-700">{parking.openingHours}</p>
+                  ) : (
+                    <p className="text-sm text-gray-500">Check with operator for current hours.</p>
+                  )}
                 </div>
               </div>
             )}

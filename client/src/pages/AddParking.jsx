@@ -14,10 +14,10 @@ const VEHICLE_OPTIONS = [
 ]
 
 const SLOT_SIZES = [
-  { value: 'COMPACT', label: 'Compact', desc: 'Hatchbacks, small cars' },
-  { value: 'MEDIUM', label: 'Medium', desc: 'Sedans, SUVs' },
-  { value: 'LARGE', label: 'Large', desc: 'Large SUVs, vans' },
-  { value: 'EXTRA_LARGE', label: 'Extra Large', desc: 'Trucks, buses' },
+  { value: 'SMALL', label: 'Small', desc: 'Motorcycles and scooters' },
+  { value: 'MEDIUM', label: 'Medium', desc: 'Hatchbacks and sedans' },
+  { value: 'LARGE', label: 'Large', desc: 'SUVs and MUVs' },
+  { value: 'EXTRA_LARGE', label: 'Extra Large', desc: 'Trucks and buses' },
 ]
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']

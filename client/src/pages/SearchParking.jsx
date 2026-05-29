@@ -239,64 +239,74 @@ const SearchParking = () => {
       <Navbar />
 
       {/* Search bar */}
-      <div className="bg-white border-b border-gray-200 py-3 flex-shrink-0">
+      <div className="bg-white border-b border-gray-200 py-4 flex-shrink-0">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <form onSubmit={handleSearch} className="flex flex-col gap-2">
-            <div className="flex flex-col sm:flex-row gap-2">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row sm:items-end gap-2">
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <label className="text-xs font-medium text-gray-500">City</label>
               <input
                 type="text"
-                placeholder="Enter city — Mumbai, Delhi, Bangalore..."
+                placeholder="Mumbai, Delhi, Bangalore..."
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white shadow-sm"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
               />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Vehicle</label>
               <select
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm shadow-sm"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
               >
                 <option value="">All vehicles</option>
                 <option value="TWO_WHEELER">Two Wheeler</option>
                 <option value="FOUR_WHEELER">Four Wheeler</option>
               </select>
-              <button
-                type="submit" disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm whitespace-nowrap shadow-sm"
-              >
-                {loading ? 'Searching...' : 'Search'}
-              </button>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 items-center">
-              <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">Filter by time:</span>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">Date</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm shadow-sm flex-1 min-w-0"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
               />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">From</label>
               <input
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm shadow-sm flex-1 min-w-0"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
               />
-              <span className="text-gray-400 text-xs hidden sm:block">to</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-500">To</label>
               <input
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm shadow-sm flex-1 min-w-0"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
               />
-              {hasTimeFilter && (
-                <button
-                  type="button"
-                  onClick={() => { setDate(''); setStartTime(''); setEndTime('') }}
-                  className="text-xs text-gray-400 hover:text-gray-600 underline whitespace-nowrap flex-shrink-0"
-                >
-                  Clear
-                </button>
-              )}
             </div>
+            {hasTimeFilter && (
+              <button
+                type="button"
+                onClick={() => { setDate(''); setStartTime(''); setEndTime('') }}
+                className="text-xs text-gray-400 hover:text-gray-600 underline whitespace-nowrap sm:mb-0.5"
+              >
+                Clear
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold px-6 py-2 rounded-lg transition-colors text-sm whitespace-nowrap shadow-sm"
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
           </form>
         </div>
       </div>
@@ -393,8 +403,10 @@ const SearchParking = () => {
                       {!isDb && spot.parkingTypeLabel && spot.parkingTypeLabel !== 'Parking' && (
                         <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">{spot.parkingTypeLabel}</span>
                       )}
-                      {isDb && spot.slotSize && spot.slotSize !== 'MEDIUM' && (
-                        <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full capitalize">{spot.slotSize.replace('_', ' ').toLowerCase()} slots</span>
+                      {isDb && spot.slotSize && (
+                        <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">
+                          {({ SMALL: 'Small', COMPACT: 'Small', MEDIUM: 'Medium', LARGE: 'Large', EXTRA_LARGE: 'Extra Large' })[spot.slotSize] || spot.slotSize} slots
+                        </span>
                       )}
                     </div>
 
