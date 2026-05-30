@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import API from '../utils/api'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
@@ -17,14 +17,21 @@ const fmt = (iso) => iso ? new Date(iso).toLocaleDateString('en-IN', { day: '2-d
 
 const TABS = [
   { key: 'pending',  label: 'Pending Review' },
-  { key: 'users',    label: 'Users'          },
-  { key: 'bookings', label: 'Bookings'       },
-  { key: 'disputes', label: 'Disputes'       },
-  { key: 'reports',  label: 'Reports'        },
+  { key: 'users',    label: 'Users' },
+  { key: 'bookings', label: 'Bookings' },
+  { key: 'disputes', label: 'Disputes' },
+  { key: 'reports',  label: 'Reports' },
 ]
 
 const TH = ({ children }) => (
   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap" style={{ background: '#f8fafc' }}>{children}</th>
+)
+
+const SkeletonStat = () => (
+  <div className="bg-white border border-gray-200 rounded-2xl p-5 animate-pulse">
+    <div className="h-8 w-16 bg-gray-200 rounded mb-1"></div>
+    <div className="h-3 w-24 bg-gray-100 rounded"></div>
+  </div>
 )
 
 const AdminDashboard = () => {
@@ -39,6 +46,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('pending')
   const [actionLoading, setActionLoading] = useState(null)
 
+  useEffect(() => { document.title = 'Admin Dashboard - ParkEase' }, [])
+
   useEffect(() => {
     Promise.all([
       API.get('/admin/dashboard').then(({ data }) => setStats(data)).catch(() => {}),
@@ -52,50 +61,27 @@ const AdminDashboard = () => {
 
   const handleApprove = async (id) => {
     setActionLoading(`approve-${id}`)
-    try {
-      await API.put(`/admin/parkings/${id}/approve`)
-      setPendingListings(pendingListings.filter(l => l.id !== id))
-    } catch { alert('Failed.') } finally { setActionLoading(null) }
+    try { await API.put(`/admin/parkings/${id}/approve`); setPendingListings(pendingListings.filter(l => l.id !== id)) }
+    catch { alert('Failed.') } finally { setActionLoading(null) }
   }
 
   const handleReject = async (id) => {
     setActionLoading(`reject-${id}`)
-    try {
-      await API.put(`/admin/parkings/${id}/reject`)
-      setPendingListings(pendingListings.filter(l => l.id !== id))
-    } catch { alert('Failed.') } finally { setActionLoading(null) }
+    try { await API.put(`/admin/parkings/${id}/reject`); setPendingListings(pendingListings.filter(l => l.id !== id)) }
+    catch { alert('Failed.') } finally { setActionLoading(null) }
   }
 
   const handleResolveDispute = async (id) => {
     setActionLoading(`resolve-${id}`)
-    try {
-      await API.put(`/disputes/${id}/resolve`)
-      setDisputes(disputes.map(d => d.id === id ? { ...d, status: 'RESOLVED' } : d))
-    } catch { alert('Failed.') } finally { setActionLoading(null) }
+    try { await API.put(`/disputes/${id}/resolve`); setDisputes(disputes.map(d => d.id === id ? { ...d, status: 'RESOLVED' } : d)) }
+    catch { alert('Failed.') } finally { setActionLoading(null) }
   }
-
-  if (loading) return (
-    <div className="min-h-screen" style={{ background: '#f8fafc' }}>
-      <Navbar />
-      <div className="flex justify-center py-24">
-        <div className="w-7 h-7 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    </div>
-  )
 
   return (
     <div className="min-h-screen" style={{ background: '#f8fafc' }}>
       <Navbar />
 
-      {/* Header */}
-      <div
-        className="border-b border-gray-100"
-        style={{
-          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
-          backgroundImage: 'radial-gradient(#2563eb12 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }}
-      >
+      <div className="border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)', backgroundImage: 'radial-gradient(#2563eb12 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
           <div className="flex items-center gap-3">
             <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(180deg, #7c3aed, #2563eb)' }}></div>
@@ -110,25 +96,26 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-7">
-          {[
-            { label: 'Users',          value: stats?.totalUsers ?? allUsers.filter(u => u.role === 'USER').length, color: '#2563eb' },
-            { label: 'Owners',         value: stats?.totalOwners ?? allUsers.filter(u => u.role === 'OWNER').length, color: '#7c3aed' },
-            { label: 'Listings',       value: stats?.totalListings ?? '-', color: '#16a34a' },
-            { label: 'Bookings',       value: stats?.totalBookings ?? allBookings.length, color: '#d97706' },
-            { label: 'Pending review', value: pendingListings.length, color: pendingListings.length > 0 ? '#dc2626' : '#6b7280', warn: true },
-          ].map(s => (
-            <div
-              key={s.label}
-              className={`rounded-2xl p-5 shadow-sm border card-hover ${s.warn && pendingListings.length > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}
-              style={{ borderTop: `3px solid ${s.color}` }}
-            >
-              <p className="text-3xl font-bold mb-0.5 stat-number"
-                style={s.warn && pendingListings.length > 0 ? { background: 'none', WebkitTextFillColor: '#dc2626', color: '#dc2626' } : {}}>
-                {s.value}
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: s.warn && pendingListings.length > 0 ? '#b91c1c' : '#94a3b8' }}>{s.label}</p>
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 5 }).map((_, i) => <SkeletonStat key={i} />)
+            : [
+                { label: 'Users',          value: stats?.totalUsers ?? allUsers.filter(u => u.role === 'USER').length, color: '#2563eb' },
+                { label: 'Owners',         value: stats?.totalOwners ?? allUsers.filter(u => u.role === 'OWNER').length, color: '#7c3aed' },
+                { label: 'Listings',       value: stats?.totalListings ?? '-', color: '#16a34a' },
+                { label: 'Bookings',       value: stats?.totalBookings ?? allBookings.length, color: '#d97706' },
+                { label: 'Pending review', value: pendingListings.length, color: pendingListings.length > 0 ? '#dc2626' : '#6b7280', warn: pendingListings.length > 0 },
+              ].map(s => (
+                <div key={s.label}
+                  className={`rounded-2xl p-5 shadow-sm border card-hover ${s.warn ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}
+                  style={{ borderTop: `3px solid ${s.color}` }}>
+                  <p className="text-3xl font-bold mb-0.5"
+                    style={s.warn ? { color: '#dc2626' } : { background: 'linear-gradient(135deg,#2563eb,#0ea5e9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                    {s.value}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: s.warn ? '#b91c1c' : '#94a3b8' }}>{s.label}</p>
+                </div>
+              ))
+          }
         </div>
 
         {/* Tabs */}
@@ -140,10 +127,7 @@ const AdminDashboard = () => {
               return (
                 <button key={t.key} onClick={() => setActiveTab(t.key)}
                   className="px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap"
-                  style={{
-                    borderBottomColor: activeTab === t.key ? '#2563eb' : 'transparent',
-                    color: activeTab === t.key ? '#2563eb' : '#6b7280',
-                  }}>
+                  style={{ borderBottomColor: activeTab === t.key ? '#2563eb' : 'transparent', color: activeTab === t.key ? '#2563eb' : '#6b7280' }}>
                   {t.label}
                   {badge > 0 && (
                     <span className="text-xs text-white px-1.5 py-0.5 rounded-full leading-none font-medium" style={{ background: '#f59e0b' }}>{badge}</span>
@@ -180,9 +164,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-6 py-4 text-gray-600">{l.city}</td>
                         <td className="px-6 py-4 font-semibold whitespace-nowrap" style={{ color: '#2563eb' }}>Rs. {l.hourlyPrice}/hr</td>
-                        <td className="px-6 py-4 text-xs text-gray-500">
-                          {(l.supportedVehicleTypes || []).map(t => t === 'TWO_WHEELER' ? '2W' : '4W').join(', ')}
-                        </td>
+                        <td className="px-6 py-4 text-xs text-gray-500">{(l.supportedVehicleTypes || []).map(t => t === 'TWO_WHEELER' ? '2W' : '4W').join(', ')}</td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
                             <button onClick={() => handleReject(l.id)} disabled={!!actionLoading}
@@ -222,12 +204,9 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 text-gray-400">{u.phone || '-'}</td>
                       <td className="px-6 py-4">
                         <span className="text-xs font-medium px-2.5 py-1 rounded-full border"
-                          style={u.role === 'ADMIN'
-                            ? { background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }
-                            : u.role === 'OWNER'
-                              ? { background: '#f5f3ff', color: '#7c3aed', borderColor: '#ddd6fe' }
-                              : { background: '#f1f5f9', color: '#475569', borderColor: '#e2e8f0' }
-                          }>
+                          style={u.role === 'ADMIN' ? { background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }
+                            : u.role === 'OWNER' ? { background: '#f5f3ff', color: '#7c3aed', borderColor: '#ddd6fe' }
+                            : { background: '#f1f5f9', color: '#475569', borderColor: '#e2e8f0' }}>
                           {u.role}
                         </span>
                       </td>
@@ -255,22 +234,13 @@ const AdminDashboard = () => {
                     const s = STATUS[b.status] || STATUS.PENDING
                     return (
                       <tr key={b.id} className="hover:bg-gray-50/80 transition-colors duration-150">
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-gray-900">{b.parking?.title || '-'}</p>
-                          <p className="text-xs text-gray-400">{b.parking?.city}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-gray-700">{b.user?.name || '-'}</p>
-                          <p className="text-xs text-gray-400">{b.user?.email}</p>
-                        </td>
+                        <td className="px-6 py-4"><p className="font-medium text-gray-900">{b.parking?.title || '-'}</p><p className="text-xs text-gray-400">{b.parking?.city}</p></td>
+                        <td className="px-6 py-4"><p className="text-gray-700">{b.user?.name || '-'}</p><p className="text-xs text-gray-400">{b.user?.email}</p></td>
                         <td className="px-6 py-4 text-gray-500 text-xs">{fmt(b.startTime)}</td>
-                        <td className="px-6 py-4 font-semibold text-gray-900">
-                          {b.totalAmount ? `Rs. ${parseFloat(b.totalAmount).toFixed(0)}` : '-'}
-                        </td>
+                        <td className="px-6 py-4 font-semibold text-gray-900">{b.totalAmount ? `Rs. ${parseFloat(b.totalAmount).toFixed(0)}` : '-'}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${s.bg} ${s.text} ${s.border}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`}></span>
-                            {s.label}
+                            <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`}></span>{s.label}
                           </span>
                         </td>
                       </tr>
@@ -300,19 +270,13 @@ const AdminDashboard = () => {
                       const s = STATUS[d.status] || STATUS.PENDING
                       return (
                         <tr key={d.id} className="hover:bg-gray-50/80 transition-colors duration-150">
-                          <td className="px-6 py-4">
-                            <p className="font-medium text-gray-900">{d.user?.name || '-'}</p>
-                            <p className="text-xs text-gray-400">{d.user?.email}</p>
-                          </td>
+                          <td className="px-6 py-4"><p className="font-medium text-gray-900">{d.user?.name || '-'}</p><p className="text-xs text-gray-400">{d.user?.email}</p></td>
                           <td className="px-6 py-4 text-gray-600 text-xs">{d.booking?.parking?.title || '-'}</td>
-                          <td className="px-6 py-4 max-w-xs">
-                            <p className="text-gray-600 text-xs line-clamp-2">{d.message}</p>
-                          </td>
+                          <td className="px-6 py-4 max-w-xs"><p className="text-gray-600 text-xs line-clamp-2">{d.message}</p></td>
                           <td className="px-6 py-4 text-gray-400 text-xs">{fmt(d.createdAt)}</td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${s.bg} ${s.text} ${s.border}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`}></span>
-                              {s.label}
+                              <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`}></span>{s.label}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -343,14 +307,12 @@ const AdminDashboard = () => {
                 { label: 'Completed', value: reports?.bookingsByStatus?.COMPLETED ?? 0, color: '#16a34a' },
                 { label: 'Cancelled', value: reports?.bookingsByStatus?.CANCELLED ?? 0, color: '#dc2626' },
               ].map(s => (
-                <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover"
-                  style={{ borderTop: `3px solid ${s.color}` }}>
+                <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover" style={{ borderTop: `3px solid ${s.color}` }}>
                   <p className="text-3xl font-bold mb-0.5 stat-number">{s.value}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
-
             {reports?.bookingsByStatus && (
               <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Bookings by status</h3>
@@ -367,52 +329,34 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-
             <div className="grid sm:grid-cols-2 gap-5">
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900">Top cities</h3>
+              {[
+                { title: 'Top cities', key: 'topCities', col: 'city' },
+                { title: 'Top listings', key: 'topListings', col: 'title' },
+              ].map(section => (
+                <div key={section.title} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-900">{section.title}</h3>
+                  </div>
+                  {!reports?.[section.key]?.length ? (
+                    <div className="text-center py-10 text-gray-400 text-sm">No data yet.</div>
+                  ) : (
+                    <table className="w-full text-sm">
+                      <thead><tr className="border-b border-gray-100"><TH>{section.col === 'city' ? 'City' : 'Listing'}</TH><TH>Bookings</TH></tr></thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {reports[section.key].map((item, i) => (
+                          <tr key={item[section.col]} className="hover:bg-gray-50/80 transition-colors">
+                            <td className="px-6 py-3 text-gray-700">
+                              <span className="text-gray-300 mr-2 text-xs font-medium">{i + 1}</span>{item[section.col]}
+                            </td>
+                            <td className="px-6 py-3 font-semibold text-gray-900">{item.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
-                {!reports?.topCities?.length ? (
-                  <div className="text-center py-10 text-gray-400 text-sm">No data yet.</div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead><tr className="border-b border-gray-100"><TH>City</TH><TH>Bookings</TH></tr></thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {reports.topCities.map((c, i) => (
-                        <tr key={c.city} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-6 py-3 text-gray-700">
-                            <span className="text-gray-300 mr-2 text-xs font-medium">{i + 1}</span>{c.city}
-                          </td>
-                          <td className="px-6 py-3 font-semibold text-gray-900">{c.count}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900">Top listings</h3>
-                </div>
-                {!reports?.topListings?.length ? (
-                  <div className="text-center py-10 text-gray-400 text-sm">No data yet.</div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead><tr className="border-b border-gray-100"><TH>Listing</TH><TH>Bookings</TH></tr></thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {reports.topListings.map((l, i) => (
-                        <tr key={l.title} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-6 py-3 text-gray-700">
-                            <span className="text-gray-300 mr-2 text-xs font-medium">{i + 1}</span>{l.title}
-                          </td>
-                          <td className="px-6 py-3 font-semibold text-gray-900">{l.count}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+              ))}
             </div>
           </div>
         )}

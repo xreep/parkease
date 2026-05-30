@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import API from '../utils/api'
 import Navbar from '../components/Navbar'
@@ -46,16 +46,15 @@ const osmElementToParking = (el, cityName) => {
   if (parkingTag !== 'motorcycle_parking') vehicleTypes.push('FOUR_WHEELER')
   vehicleTypes.push('TWO_WHEELER')
   return {
-    id: `osm-${el.id}`,
-    title: name || parkingTypeLabel + ' Parking',
+    id: `osm-${el.id}`, title: name || parkingTypeLabel + ' Parking',
     address, city: cityName, latitude: lat, longitude: lon, source: 'osm',
     parkingTypeLabel, access: tags.access || null, fee: tags.fee || null,
     capacity: tags.capacity ? parseInt(tags.capacity) : null, operator: tags.operator || null,
     phone: tags.phone || tags['contact:phone'] || tags['contact:mobile'] || null,
-    openingHours: tags['opening_hours'] || null,
-    covered: tags.covered || null, surface: tags.surface || null,
-    maxHeight: tags['maxheight'] || null, maxStay: tags['maxstay'] || null,
-    wheelchair: tags.wheelchair || null, website: tags.website || tags['contact:website'] || null,
+    openingHours: tags['opening_hours'] || null, covered: tags.covered || null,
+    surface: tags.surface || null, maxHeight: tags['maxheight'] || null,
+    maxStay: tags['maxstay'] || null, wheelchair: tags.wheelchair || null,
+    website: tags.website || tags['contact:website'] || null,
     supportedVehicleTypes: vehicleTypes, vehicleTypes,
   }
 }
@@ -131,6 +130,28 @@ const isOpenNow = (schedule) => {
 
 const VEHICLE_LABELS = { TWO_WHEELER: '2-Wheeler', FOUR_WHEELER: '4-Wheeler' }
 
+const QUICK_CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune']
+
+const SkeletonCard = () => (
+  <div className="bg-white rounded-2xl p-4 border border-gray-100 animate-pulse">
+    <div className="flex items-start justify-between mb-3">
+      <div className="flex-1">
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+      </div>
+      <div className="h-5 w-16 bg-gray-200 rounded-full ml-2 flex-shrink-0"></div>
+    </div>
+    <div className="flex gap-2 mb-3">
+      <div className="h-5 w-16 bg-gray-100 rounded-full"></div>
+      <div className="h-5 w-16 bg-gray-100 rounded-full"></div>
+    </div>
+    <div className="flex items-center justify-between">
+      <div className="h-5 w-20 bg-gray-200 rounded"></div>
+      <div className="h-8 w-20 bg-gray-200 rounded-xl"></div>
+    </div>
+  </div>
+)
+
 const SearchParking = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [city, setCity] = useState(searchParams.get('city') || '')
@@ -141,10 +162,11 @@ const SearchParking = () => {
   const [results, setResults] = useState([])
   const [mapCenter, setMapCenter] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [loadingMsg, setLoadingMsg] = useState('')
   const [osmLoading, setOsmLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => { document.title = 'Find Parking - ParkEase' }, [])
 
   const buildApiParams = (v, d, st, et) => {
     const p = {}
@@ -156,24 +178,22 @@ const SearchParking = () => {
   }
 
   const fetchDbOnly = async (v, d, st, et) => {
-    setLoading(true); setLoadingMsg('Loading parking spaces...'); setError('')
+    setLoading(true); setError('')
     try {
       const { data } = await API.get('/parkings', { params: buildApiParams(v, d, st, et) })
       let list = Array.isArray(data) ? data : (Array.isArray(data?.parkings) ? data.parkings : [])
-      list = list.map(p => ({ ...p, source: 'db' }))
-      setResults(list)
+      setResults(list.map(p => ({ ...p, source: 'db' })))
     } catch {
       setError('Could not load parking spaces.'); setResults([])
     } finally {
-      setLoading(false); setSearched(true); setLoadingMsg('')
+      setLoading(false); setSearched(true)
     }
   }
 
   const fetchSearch = async (c, v, d, st, et) => {
     if (!c.trim()) { fetchDbOnly(v, d, st, et); return }
-    setLoading(true); setLoadingMsg('Loading parking spaces...'); setError(''); setResults([])
-    let dbList = []
-    let coords = null
+    setLoading(true); setError(''); setResults([])
+    let dbList = [], coords = null
     try {
       const apiParams = { city: c, ...buildApiParams(v, d, st, et) }
       const [coordsResult, dbRes] = await Promise.all([
@@ -186,18 +206,10 @@ const SearchParking = () => {
       setResults(dbList)
       setLoading(false)
       setSearched(true)
-      setLoadingMsg('')
-      if (!coords && dbList.length === 0) {
-        setError(`Could not locate "${c}" on the map. Try a major city name.`)
-        return
-      }
+      if (!coords && dbList.length === 0) { setError(`Could not locate "${c}". Try a major city name.`); return }
     } catch {
       setError('Could not fetch parking data. Please try again.')
-      setResults([])
-      setLoading(false)
-      setSearched(true)
-      setLoadingMsg('')
-      return
+      setResults([]); setLoading(false); setSearched(true); return
     }
     if (!coords) return
     setOsmLoading(true)
@@ -245,10 +257,17 @@ const SearchParking = () => {
     fetchSearch(city, vehicleType, date, startTime, endTime)
   }
 
+  const handleQuickCity = (c) => {
+    setCity(c)
+    setSearchParams({ city: c, ...(vehicleType ? { vehicleType } : {}) })
+    fetchSearch(c, vehicleType, date, startTime, endTime)
+  }
+
   const mapParkings = results.filter(p => p.latitude && p.longitude)
   const dbResults = results.filter(p => p.source === 'db')
   const osmResults = results.filter(p => p.source === 'osm')
   const hasTimeFilter = date || startTime || endTime
+  const hasSearched = searched || searchParams.get('city')
 
   const inputClass = "border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white transition-all duration-200"
 
@@ -256,7 +275,7 @@ const SearchParking = () => {
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
 
-      {/* Search bar — glass morphism on light blue */}
+      {/* Search bar */}
       <div
         className="flex-shrink-0 py-4 border-b border-blue-100/50"
         style={{ background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)' }}
@@ -266,20 +285,13 @@ const SearchParking = () => {
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <label className="text-xs font-medium text-gray-500">City</label>
               <input
-                type="text"
-                placeholder="Mumbai, Delhi, Bangalore..."
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className={inputClass}
+                type="text" placeholder="Mumbai, Delhi, Bangalore..."
+                value={city} onChange={(e) => setCity(e.target.value)} className={inputClass}
               />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-500">Vehicle</label>
-              <select
-                value={vehicleType}
-                onChange={(e) => setVehicleType(e.target.value)}
-                className={inputClass}
-              >
+              <select value={vehicleType} onChange={(e) => setVehicleType(e.target.value)} className={inputClass}>
                 <option value="">All vehicles</option>
                 <option value="TWO_WHEELER">Two Wheeler</option>
                 <option value="FOUR_WHEELER">Four Wheeler</option>
@@ -287,45 +299,24 @@ const SearchParking = () => {
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-500">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={inputClass}
-              />
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-500">From</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className={inputClass}
-              />
+              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputClass} />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-500">To</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className={inputClass}
-              />
+              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputClass} />
             </div>
             {hasTimeFilter && (
-              <button
-                type="button"
-                onClick={() => { setDate(''); setStartTime(''); setEndTime('') }}
-                className="text-xs text-gray-400 hover:text-gray-600 underline whitespace-nowrap sm:mb-0.5 transition-colors"
-              >
+              <button type="button" onClick={() => { setDate(''); setStartTime(''); setEndTime('') }}
+                className="text-xs text-gray-400 hover:text-gray-600 underline whitespace-nowrap transition-colors">
                 Clear
               </button>
             )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary text-white font-semibold px-6 py-2.5 rounded-xl text-sm whitespace-nowrap"
-            >
+            <button type="submit" disabled={loading}
+              className="btn-primary text-white font-semibold px-6 py-2.5 rounded-xl text-sm whitespace-nowrap">
               {loading ? 'Searching...' : 'Search'}
             </button>
           </form>
@@ -356,11 +347,16 @@ const SearchParking = () => {
         </div>
       )}
 
-      {/* Loading */}
+      {/* Skeleton loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-24 gap-3 flex-1">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" style={{ borderWidth: '3px' }}></div>
-          <p className="text-gray-400 text-sm">{loadingMsg || 'Searching...'}</p>
+        <div className="flex-1" style={{ background: '#f8fafc' }}>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-5 h-full">
+              <div className="lg:col-span-3 p-4 space-y-3">
+                {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -370,11 +366,67 @@ const SearchParking = () => {
         </div>
       )}
 
-      {/* Split layout */}
+      {/* Empty / pre-search state */}
+      {!loading && !error && searched && results.length === 0 && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center py-16 max-w-sm mx-auto px-4">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+              style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="#2563eb" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <p className="text-gray-900 font-semibold mb-1 text-base">No parking found</p>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              Try a nearby major city or remove the vehicle type filter.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {QUICK_CITIES.map(c => (
+                <button key={c} onClick={() => handleQuickCity(c)}
+                  className="text-xs font-medium px-3 py-1.5 rounded-xl border border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pre-search empty state (no search performed) */}
+      {!loading && !searched && !searchParams.get('city') && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center py-16 max-w-md mx-auto px-4">
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+              style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)', boxShadow: '0 8px 30px rgba(37,99,235,0.3)' }}
+            >
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Find parking near you</h2>
+            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+              Search any city across India to find available parking spaces and public parking locations.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {QUICK_CITIES.map(c => (
+                <button key={c} onClick={() => handleQuickCity(c)}
+                  className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200">
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Split layout — results + map */}
       {!loading && searched && (results.length > 0 || osmLoading) && (
         <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 185px)' }}>
-
-          {/* Left: scrollable cards */}
           <div className="w-full lg:w-[55%] overflow-y-auto border-r border-gray-100 flex-shrink-0" style={{ background: '#f8fafc' }}>
             <div className="p-4 space-y-3">
               {results.map((spot) => {
@@ -386,7 +438,7 @@ const SearchParking = () => {
                 return (
                   <div
                     key={spot.id}
-                    className="bg-white rounded-2xl p-4 card-hover cursor-pointer transition-all duration-200"
+                    className="bg-white rounded-2xl p-4 cursor-pointer transition-all duration-200"
                     style={{
                       border: '1px solid #e2e8f0',
                       borderLeft: isDb ? '3px solid #2563eb' : '3px solid #94a3b8',
@@ -403,24 +455,20 @@ const SearchParking = () => {
                       <h3 className="font-semibold text-gray-900 text-sm leading-snug flex-1">{spot.title}</h3>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         {isDb && openStatus !== null && (
-                          <span
-                            className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                             style={openStatus
                               ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
                               : { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }
-                            }
-                          >
+                            }>
                             {openStatus ? 'Open' : 'Closed'}
                           </span>
                         )}
-                        <span
-                          className="text-xs px-2 py-0.5 rounded-full font-medium"
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                           style={{
                             background: isDb ? '#eff6ff' : '#f8fafc',
                             color: isDb ? '#2563eb' : '#64748b',
                             border: `1px solid ${isDb ? '#bfdbfe' : '#e2e8f0'}`,
-                          }}
-                        >
+                          }}>
                           {isDb ? 'Bookable' : 'OSM'}
                         </span>
                       </div>
@@ -479,8 +527,7 @@ const SearchParking = () => {
             </div>
           </div>
 
-          {/* Right: sticky map */}
-          <div className="hidden lg:block flex-1 relative" style={{ borderRadius: '0 0 0 0' }}>
+          <div className="hidden lg:block flex-1 relative">
             {mapParkings.length > 0 ? (
               <MapView
                 parkings={mapParkings}
@@ -504,17 +551,6 @@ const SearchParking = () => {
             zoom={mapCenter ? 12 : 11}
             style={{ height: '100%', width: '100%' }}
           />
-        </div>
-      )}
-
-      {!loading && searched && results.length === 0 && !error && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center py-20">
-            <p className="text-gray-900 font-semibold mb-1">No parking data found</p>
-            <p className="text-gray-400 text-sm max-w-xs mx-auto">
-              Try a nearby major city or a different vehicle type.
-            </p>
-          </div>
         </div>
       )}
     </div>

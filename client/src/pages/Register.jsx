@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import API from '../utils/api'
@@ -9,6 +9,8 @@ const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', role: 'USER' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => { document.title = 'Create Account - ParkEase' }, [])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -41,7 +43,6 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel — animated gradient */}
       <div className="hidden lg:flex lg:w-5/12 flex-col justify-between p-12 gradient-animated">
         <Link to="/" className="text-2xl font-bold text-white tracking-tight">ParkEase</Link>
         <div>
@@ -56,7 +57,7 @@ const Register = () => {
               'No hidden fees — transparent pricing always',
             ].map((point) => (
               <div key={point} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 backdrop-blur-sm">
+                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <div className="w-2 h-2 rounded-full bg-white"></div>
                 </div>
                 <span className="text-sm text-blue-100 leading-relaxed">{point}</span>
@@ -67,7 +68,6 @@ const Register = () => {
         <p className="text-blue-300/70 text-xs">&copy; {new Date().getFullYear()} ParkEase India</p>
       </div>
 
-      {/* Right panel */}
       <div className="flex-1 flex items-center justify-center bg-white px-6 py-10">
         <div className="w-full max-w-sm animate-fadeInUp">
           <div className="mb-7">
@@ -86,22 +86,22 @@ const Register = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Full name</label>
               <input type="text" name="name" required value={form.name} onChange={handleChange}
-                placeholder="Rahul Sharma" className={inp} />
+                placeholder="Rahul Sharma" autoComplete="name" className={inp} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
               <input type="email" name="email" required value={form.email} onChange={handleChange}
-                placeholder="you@example.com" className={inp} />
+                placeholder="you@example.com" autoComplete="email" className={inp} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <input type="password" name="password" required value={form.password} onChange={handleChange}
-                placeholder="Min. 8 chars, uppercase, lowercase, number" className={inp} />
+                placeholder="Min. 8 chars, uppercase, lowercase, number" autoComplete="new-password" className={inp} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone number</label>
               <input type="tel" name="phone" value={form.phone} onChange={handleChange}
-                placeholder="+91 98765 43210" className={inp} />
+                placeholder="+91 98765 43210" autoComplete="tel" className={inp} />
             </div>
 
             <div>

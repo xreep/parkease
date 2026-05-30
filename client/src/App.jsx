@@ -9,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard'
 import SearchParking from './pages/SearchParking'
 import ParkingDetails from './pages/ParkingDetails'
 import AddParking from './pages/AddParking'
+import HowItWorks from './pages/HowItWorks'
+import NotFound from './pages/NotFound'
 
 const ProtectedRoute = ({ children, roles }) => {
   const { user } = useAuth()
@@ -27,6 +29,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/search" element={<SearchParking />} />
           <Route path="/parking/:id" element={<ParkingDetails />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/dashboard" element={
             <ProtectedRoute roles={['USER']}>
               <UserDashboard />
@@ -47,6 +50,7 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>

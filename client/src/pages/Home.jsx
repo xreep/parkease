@@ -1,71 +1,127 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 
-const STEPS = [
-  { n: '01', title: 'Search your city', desc: 'Enter your city and vehicle type to instantly see verified listings and public OpenStreetMap locations nearby.' },
-  { n: '02', title: 'Book your spot', desc: 'Pick a space, choose your date and time, enter your vehicle number, and confirm. It takes under a minute.' },
-  { n: '03', title: 'Drive in and park', desc: 'Navigate to the address. Your slot is reserved. No circling, no guessing, no wasted time.' },
-]
-
-const FEATURES = [
+const WHY_CARDS = [
   {
-    title: 'Real-time availability',
-    desc: 'See which slots are open right now. Our listings sync live so you never arrive at a full lot.',
+    title: 'Real-time Availability',
+    desc: 'See live parking availability before you go. Our listings sync in real time so you never arrive at a full lot.',
     icon: (
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
   },
   {
-    title: 'Verified listings',
-    desc: 'Every bookable space is reviewed by our team before it goes live. Park with confidence.',
+    title: 'Advance Booking',
+    desc: 'Reserve your spot hours or days in advance. Walk in with confidence knowing your slot is secured.',
     icon: (
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Verified Listings',
+    desc: 'Every bookable parking space is reviewed by our team before it goes live. Park with complete confidence.',
+    icon: (
+      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
   },
   {
-    title: 'Instant confirmation',
-    desc: 'Receive a booking confirmation by email the moment you pay. No waiting for owner approval.',
+    title: 'Secure Payments',
+    desc: 'Safe and secure payment processing via Razorpay. Pay with UPI, card, or net banking — no hidden charges.',
     icon: (
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
       </svg>
     ),
   },
 ]
 
-const CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata', 'Ahmedabad']
-
-const STATS = [
-  { value: '5+', label: 'Cities covered' },
-  { value: '500+', label: 'Verified listings' },
-  { value: '10K+', label: 'Bookings made' },
-  { value: '4.8', label: 'Average rating' },
+const HOW_STEPS = [
+  { n: 1, title: 'Search', desc: 'Enter your destination city and find nearby parking options on the map.' },
+  { n: 2, title: 'Book',   desc: 'Select your preferred slot, choose your time, and pay securely in seconds.' },
+  { n: 3, title: 'Park',   desc: 'Arrive at the address. Your slot is reserved and waiting for you.' },
 ]
+
+const CITIES = [
+  'Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune',
+  'Kolkata', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Noida', 'Gurugram',
+  'Chandigarh', 'Indore', 'Bhopal',
+]
+
+const TESTIMONIALS = [
+  {
+    quote: 'Found a covered spot in Bandra in under two minutes. The booking process is straightforward and the slot was exactly as described. Will use every time I visit Mumbai.',
+    name: 'Arjun Mehta',
+    city: 'Pune',
+    stars: 5,
+  },
+  {
+    quote: 'I listed my garage on ParkEase and within a week I was getting regular bookings. The dashboard makes it easy to track everything. Great for earning passive income.',
+    name: 'Sunita Rao',
+    city: 'Bangalore',
+    stars: 5,
+  },
+  {
+    quote: 'Parked near Connaught Place without driving around for 20 minutes like usual. The OpenStreetMap locations are also a great touch for when you just need a quick reference.',
+    name: 'Vikram Singh',
+    city: 'Delhi',
+    stars: 5,
+  },
+]
+
+const OWNER_BENEFITS = [
+  'Set your own hours and pricing',
+  'Instant booking notifications',
+  'Earn from otherwise empty space',
+  'Admin-reviewed listings for trust',
+  'Full control via owner dashboard',
+]
+
+const FOOTER_LINKS = {
+  Product: [
+    { label: 'Find Parking', to: '/search' },
+    { label: 'List Your Space', to: '/register' },
+    { label: 'How It Works', to: '/how-it-works' },
+    { label: 'Pricing', to: '#' },
+  ],
+  Company: [
+    { label: 'About', to: '#' },
+    { label: 'Blog', to: '#' },
+    { label: 'Careers', to: '#' },
+    { label: 'Contact', to: '#' },
+  ],
+  Support: [
+    { label: 'Help Center', to: '#' },
+    { label: 'Safety', to: '#' },
+    { label: 'Terms', to: '#' },
+    { label: 'Privacy', to: '#' },
+  ],
+}
 
 const Home = () => {
   const [city, setCity] = useState('')
   const [vehicleType, setVehicleType] = useState('FOUR_WHEELER')
   const navigate = useNavigate()
 
+  useEffect(() => { document.title = 'ParkEase - Find & Book Parking in India' }, [])
+
   const handleSearch = (e) => {
     e.preventDefault()
     if (city.trim()) navigate(`/search?city=${encodeURIComponent(city.trim())}&vehicleType=${vehicleType}`)
   }
 
-  const handleCityClick = (c) => {
-    navigate(`/search?city=${encodeURIComponent(c)}&vehicleType=${vehicleType}`)
-  }
+  const handleCityClick = (c) => navigate(`/search?city=${encodeURIComponent(c)}&vehicleType=${vehicleType}`)
 
   return (
     <div className="min-h-screen font-sans" style={{ background: '#f8fafc' }}>
       <Navbar />
 
-      {/* Hero */}
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section
         className="relative flex items-center"
         style={{
@@ -92,7 +148,6 @@ const Home = () => {
               Search verified parking spaces and public locations across Indian cities. Reserve your spot before you leave.
             </p>
 
-            {/* Glass morphism search bar */}
             <form
               onSubmit={handleSearch}
               className="flex flex-col sm:flex-row gap-2 max-w-xl p-2 rounded-2xl"
@@ -100,7 +155,6 @@ const Home = () => {
                 background: 'rgba(255,255,255,0.95)',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
-                borderRadius: '16px',
                 boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
                 border: '1px solid rgba(255,255,255,0.5)',
               }}
@@ -128,9 +182,8 @@ const Home = () => {
               </button>
             </form>
 
-            {/* City quick-select pills */}
             <div className="flex flex-wrap gap-2 mt-5">
-              {CITIES.map((c) => (
+              {['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Pune'].map((c) => (
                 <button
                   key={c}
                   onClick={() => handleCityClick(c)}
@@ -158,18 +211,21 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-        {/* Decorative bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
           style={{ background: 'linear-gradient(to bottom, transparent, #0f172a)' }}></div>
       </section>
 
-      {/* Stats section */}
-      <section style={{ background: '#0f172a' }} className="py-16 border-b border-white/5">
+      {/* ── Stats strip ──────────────────────────────────────────────────── */}
+      <section style={{ background: '#0f172a' }} className="py-12 border-b border-white/5">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-            {STATS.map((s, i) => (
-              <div key={s.label} className={`text-center animate-fadeInUp-${Math.min(i + 1, 3)}`}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+            {[
+              { value: '15+', label: 'Cities covered' },
+              { value: '500+', label: 'Verified listings' },
+              { value: '10K+', label: 'Bookings made' },
+              { value: '4.8', label: 'Average rating' },
+            ].map((s) => (
+              <div key={s.label}>
                 <p className="text-4xl font-bold mb-1 stat-number">{s.value}</p>
                 <p className="text-sm text-slate-400">{s.label}</p>
               </div>
@@ -178,133 +234,219 @@ const Home = () => {
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how-it-works" className="py-24 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">How it works</p>
-              <h2 className="text-3xl font-bold text-gray-900 mb-10">Park in three simple steps</h2>
-              <div className="space-y-6">
-                {STEPS.map((s, idx) => (
-                  <div
-                    key={s.n}
-                    className="flex gap-5 p-5 rounded-2xl card-hover"
-                    style={{
-                      background: 'rgba(255,255,255,0.7)',
-                      backdropFilter: 'blur(12px)',
-                      border: '1px solid rgba(255,255,255,0.8)',
-                      boxShadow: '0 4px 20px rgba(37,99,235,0.06)',
-                    }}
-                  >
-                    <span
-                      className="text-lg font-bold flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm"
-                      style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <div>
-                      <h3 className="text-base font-semibold text-gray-900 mb-1">{s.title}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-blue-100">
-              <img
-                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
-                alt="Parking lot"
-                className="w-full h-80 lg:h-96"
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-24 border-b border-gray-100 bg-white">
+      {/* ── Why Choose ParkEase ───────────────────────────────────────────── */}
+      <section className="py-24 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Why ParkEase</p>
-            <h2 className="text-3xl font-bold text-gray-900">Built for Indian drivers</h2>
-            <p className="text-gray-500 mt-3 text-sm max-w-md mx-auto">Everything you need to find, book, and park — with confidence.</p>
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Benefits</p>
+            <h2 className="text-3xl font-bold text-gray-900">Why Choose ParkEase?</h2>
+            <p className="text-gray-500 mt-3 text-sm max-w-md mx-auto">The smarter way to find and book parking across India</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {WHY_CARDS.map((c) => (
               <div
-                key={f.title}
-                className="rounded-2xl p-7 shadow-sm card-hover border"
-                style={{
-                  borderColor: '#e2e8f0',
-                  background: '#ffffff',
-                }}
+                key={c.title}
+                className="bg-white border border-gray-200 rounded-2xl p-6 card-hover"
+                style={{ borderTop: '3px solid #2563eb' }}
               >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
-                >
-                  {f.icon}
+                <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
+                  {c.icon}
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">{c.title}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">{c.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Owner CTA */}
+      {/* ── How It Works ─────────────────────────────────────────────────── */}
+      <section id="how-it-works" className="py-24 border-b border-gray-100" style={{ background: '#eff6ff' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Process</p>
+            <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {HOW_STEPS.map((s, i) => (
+              <div
+                key={s.n}
+                className={`rounded-2xl p-7 card-hover border animate-fadeInUp-${Math.min(i + 1, 3)}`}
+                style={{
+                  background: 'rgba(255,255,255,0.8)',
+                  backdropFilter: 'blur(12px)',
+                  borderColor: '#bfdbfe',
+                }}
+              >
+                <span
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-base font-bold mb-4"
+                  style={{ background: 'linear-gradient(135deg, #2563eb, #0ea5e9)' }}
+                >
+                  {s.n}
+                </span>
+                <h3 className="text-base font-semibold text-gray-900 mb-2">{s.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link to="/how-it-works" className="text-sm font-semibold text-blue-600 hover:underline transition-colors">
+              Learn more about how it works &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── For Parking Owners ───────────────────────────────────────────── */}
       <section
-        className="py-28"
+        className="py-28 border-b border-white/5"
         style={{
-          backgroundImage: 'linear-gradient(rgba(15,23,42,0.9), rgba(15,23,42,0.9)), url(https://images.unsplash.com/photo-1573375004773-64e5c8d7d859?w=800&q=80)',
+          backgroundImage: 'linear-gradient(rgba(15,23,42,0.92), rgba(15,23,42,0.92)), url(https://images.unsplash.com/photo-1573375004773-64e5c8d7d859?w=800&q=80)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-xl">
-            <p className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">For space owners</p>
-            <h2 className="text-3xl font-bold text-white mb-4 leading-tight">Turn your unused space into steady income</h2>
-            <p className="text-blue-100/80 text-sm leading-relaxed mb-8">
-              Have a garage, driveway, or empty plot? List it on ParkEase and earn from drivers who need a reliable spot. Free to list — no upfront cost.
-            </p>
-            <div className="flex flex-wrap gap-3">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <p className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-3">For Space Owners</p>
+              <h2 className="text-3xl font-bold text-white mb-4 leading-tight">Earn from your unused parking space</h2>
+              <p className="text-blue-100/80 text-sm leading-relaxed mb-7">
+                Have a garage, driveway, or empty plot? List it on ParkEase and earn from drivers who need a reliable spot. Free to list — no upfront cost.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {OWNER_BENEFITS.map((b) => (
+                  <li key={b} className="flex items-center gap-3 text-sm text-blue-100">
+                    <span className="w-5 h-5 rounded-full bg-blue-600/30 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
               <Link
                 to="/register"
                 className="btn-primary inline-block text-white font-semibold px-7 py-3 rounded-xl text-sm"
               >
-                List your space
+                List Your Space
               </Link>
-              <Link
-                to="/search"
-                className="inline-block border text-white font-semibold px-7 py-3 rounded-xl transition-all duration-200 text-sm hover:bg-white/10"
-                style={{ borderColor: 'rgba(255,255,255,0.3)' }}
-              >
-                Find parking
-              </Link>
+            </div>
+            <div className="hidden lg:grid grid-cols-2 gap-4">
+              {[
+                { label: 'Active listings', value: '500+' },
+                { label: 'Cities covered', value: '15+' },
+                { label: 'Owner payouts', value: 'Monthly' },
+                { label: 'Setup time', value: '< 10 min' },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl p-5 border border-white/10 text-center"
+                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                >
+                  <p className="text-2xl font-bold text-white mb-1">{item.value}</p>
+                  <p className="text-xs text-blue-300">{item.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ background: '#0f172a' }} className="py-10 border-t border-white/5">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span
-            className="text-base font-bold text-white transition-all duration-200 hover:opacity-80"
-            style={{ textShadow: '0 0 20px rgba(37,99,235,0.5)' }}
-          >
-            ParkEase
-          </span>
-          <div className="flex gap-7 text-sm text-slate-400">
-            <Link to="/search" className="hover:text-white transition-colors duration-200">Find Parking</Link>
-            <Link to="/login" className="hover:text-white transition-colors duration-200">Log in</Link>
-            <Link to="/register" className="hover:text-white transition-colors duration-200">Sign up</Link>
+      {/* ── Cities We Cover ──────────────────────────────────────────────── */}
+      <section className="py-20 bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Coverage</p>
+            <h2 className="text-3xl font-bold text-gray-900">Cities We Cover</h2>
+            <p className="text-gray-500 mt-3 text-sm">Click any city to see parking near you</p>
           </div>
-          <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} ParkEase India</p>
+          <div className="flex flex-wrap justify-center gap-2.5">
+            {CITIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => handleCityClick(c)}
+                className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+                style={{ transition: 'all 0.2s ease' }}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ─────────────────────────────────────────────────── */}
+      <section className="py-24 border-b border-gray-100" style={{ background: '#f8fafc' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">Testimonials</p>
+            <h2 className="text-3xl font-bold text-gray-900">What our users say</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                className="bg-white border border-gray-200 rounded-2xl p-6 card-hover"
+                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+              >
+                <div className="flex items-center gap-0.5 mb-4">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <div key={i} className="w-4 h-4 rounded-full" style={{ background: '#f59e0b' }}></div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed mb-5">"{t.quote}"</p>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+                  <p className="text-xs text-gray-400">{t.city}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer style={{ background: '#1e293b' }} className="pt-14 pb-6 border-t border-white/5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-12">
+            {/* Brand */}
+            <div className="col-span-2 sm:col-span-1">
+              <span className="text-xl font-bold text-white block mb-2" style={{ textShadow: '0 0 20px rgba(37,99,235,0.5)' }}>ParkEase</span>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                The smarter way to find and book parking across India.
+              </p>
+            </div>
+
+            {/* Link columns */}
+            {Object.entries(FOOTER_LINKS).map(([group, links]) => (
+              <div key={group}>
+                <p className="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">{group}</p>
+                <ul className="space-y-2.5">
+                  {links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        to={link.to}
+                        className="text-sm text-slate-400 hover:text-white transition-colors duration-200"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-slate-500">Copyright {new Date().getFullYear()} ParkEase. All rights reserved.</p>
+            <div className="flex gap-5 text-xs text-slate-500">
+              <Link to="#" className="hover:text-slate-300 transition-colors">Terms</Link>
+              <Link to="#" className="hover:text-slate-300 transition-colors">Privacy</Link>
+              <Link to="#" className="hover:text-slate-300 transition-colors">Contact</Link>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
